@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【嘉鹿】包裝日報</title>
+<style>
+/* ── Reset & Variables ───────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f1f5f9;
+  --surface:#fff;
+  --border:#e2e8f0;
+  --border-lite:#f1f5f9;
+
+  --indigo:#4f46e5;
+  --indigo-d:#3730a3;
+  --indigo-lite:#ede9fe;
+  --green:#10b981;
+  --green-lite:#d1fae5;
+  --red:#ef4444;
+  --red-lite:#fee2e2;
+  --amber:#f59e0b;
+  --amber-lite:#fef3c7;
+  --purple:#8b5cf6;
+  --purple-lite:#f3f0ff;
+
+  --text:#0f172a;
+  --text2:#475569;
+  --text3:#94a3b8;
+
+  --sh-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --sh:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -1px rgba(0,0,0,.04);
+  --sh-lg:0 10px 15px -3px rgba(0,0,0,.09),0 4px 6px -2px rgba(0,0,0,.05);
+  --sh-xl:0 20px 25px -5px rgba(0,0,0,.12),0 10px 10px -5px rgba(0,0,0,.05);
+
+  --r:8px;--r-lg:14px;--r-full:9999px;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','微軟正黑體',sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+
+/* ── Topbar ──────────────────────────────────────────────── */
+.topbar{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 24px;height:58px;display:flex;align-items:center;gap:14px;
+  position:sticky;top:0;z-index:200;box-shadow:var(--sh-sm);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-logo{
+  width:34px;height:34px;background:var(--indigo);border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;font-size:12px;letter-spacing:.5px;flex-shrink:0;
+}
+.brand-name{font-size:15px;font-weight:600;letter-spacing:.3px}
+.brand-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.topbar-gap{flex:1}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.month-picker{
+  padding:4px 10px;border:1px solid var(--border);border-radius:var(--r);
+  font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text);
+  outline:none;cursor:pointer;
+}
+.month-picker:focus{border-color:var(--indigo);box-shadow:0 0 0 2px rgba(79,70,229,.1)}
+.rc-badge{
+  font-size:11px;color:var(--text3);padding:3px 10px;
+  background:var(--bg);border-radius:var(--r-full);border:1px solid var(--border);
+}
+.rc-amt{color:var(--indigo);font-weight:700;font-size:13px;border-color:var(--indigo-lite);background:var(--indigo-lite)}
+
+/* ── Settings modal ──────────────────────────────────────── */
+.stg-overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:500;
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.stg-overlay.open{display:flex}
+.stg-box{
+  background:var(--surface);border-radius:var(--r-lg);width:100%;max-width:520px;
+  box-shadow:var(--sh-xl);display:flex;flex-direction:column;max-height:80vh;
+}
+.stg-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px 0;flex-shrink:0;
+}
+.stg-import-bar{
+  display:flex;align-items:center;gap:6px;padding:10px 20px 0;flex-shrink:0;
+  border-bottom:1px solid var(--border);padding-bottom:12px;
+}
+.stg-title{font-size:16px;font-weight:700}
+.stg-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 20px;margin-top:14px;flex-shrink:0}
+.stg-tab{
+  padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;
+  border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px;
+}
+.stg-tab.active{border-color:var(--indigo);color:var(--indigo)}
+.stg-body{padding:16px 20px;overflow-y:auto;flex:1}
+.stg-foot{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border);flex-shrink:0}
+.stg-section{display:none}
+.stg-section.active{display:block}
+.stg-add{display:flex;gap:8px;margin-bottom:14px}
+.stg-add input{flex:1}
+.tag-list{display:flex;flex-wrap:wrap;gap:6px}
+.tag-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--r-full);font-size:12px;color:var(--text);
+}
+.tag-chip button{
+  background:none;border:none;cursor:pointer;color:var(--text3);
+  font-size:13px;line-height:1;padding:0;display:flex;align-items:center;
+}
+.tag-chip button:hover{color:var(--red)}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 14px;border-radius:var(--r);border:none;
+  font-size:13px;font-family:var(--font);font-weight:500;
+  cursor:pointer;transition:all .15s;white-space:nowrap;line-height:1.4;
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--indigo);color:#fff}
+.btn-primary:hover{background:var(--indigo-d)}
+.btn-success{background:var(--green);color:#fff}
+.btn-success:hover{background:#059669}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg);border-color:#cbd5e1}
+.btn-danger-ghost{background:transparent;color:var(--red);border:1px solid #fecaca}
+.btn-danger-ghost:hover{background:var(--red-lite)}
+.btn-icon{
+  width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:var(--r);border:1px solid var(--border);background:transparent;
+  color:var(--text2);cursor:pointer;transition:all .15s;font-size:15px;
+}
+.btn-icon:hover{background:var(--bg);color:var(--text)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px}
+
+/* ── Main layout ─────────────────────────────────────────── */
+.main{
+  padding:24px;max-width:1480px;margin:0 auto;width:100%;
+  display:flex;flex-direction:column;gap:20px;
+}
+
+/* ── Stats row ───────────────────────────────────────────── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.stats-row{grid-template-columns:1fr 1fr};.main{padding:14px}}
+.stat-card{
+  background:var(--surface);border-radius:var(--r-lg);padding:18px 20px;
+  box-shadow:var(--sh-sm);border:1px solid var(--border);
+  display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden;
+}
+.stat-card::after{
+  content:attr(data-icon);position:absolute;right:14px;top:50%;
+  transform:translateY(-50%);font-size:32px;opacity:.1;pointer-events:none;
+}
+.sc-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.sc-value{font-size:22px;font-weight:700;color:var(--text);line-height:1.2;margin-top:2px}
+.stat-card[data-color=indigo]{border-top:3px solid var(--indigo)}
+.stat-card[data-color=green] {border-top:3px solid var(--green)}
+.stat-card[data-color=amber] {border-top:3px solid var(--amber)}
+.stat-card[data-color=purple]{border-top:3px solid var(--purple)}
+
+/* ── Table card ──────────────────────────────────────────── */
+.table-card{
+  background:var(--surface);border-radius:var(--r-lg);
+  box-shadow:var(--sh-sm);border:1px solid var(--border);overflow:hidden;
+}
+.table-toolbar{
+  padding:10px 16px;display:flex;align-items:center;justify-content:flex-end;gap:8px;
+  border-bottom:1px solid var(--border);background:#fafbfc;
+}
+.fi{
+  padding:5px 10px;border:1px solid var(--border);border-radius:var(--r);
+  font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text);
+  outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.fi:focus{border-color:var(--indigo);box-shadow:0 0 0 2px rgba(79,70,229,.15)}
+.toolbar-actions{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
+
+/* ── Table ───────────────────────────────────────────────── */
+.table-wrap{overflow-x:auto;overflow-y:auto;max-height:58vh}
+table{border-collapse:collapse;width:100%;min-width:1000px;font-size:13px}
+thead{position:sticky;top:0;z-index:10}
+thead tr.th-main th{
+  background:#f8fafc;color:var(--text3);font-size:10.5px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.5px;padding:9px 8px;
+  text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;
+}
+thead tr.th-sub th{
+  background:#f8fafc;color:var(--text3);font-size:10px;font-weight:500;
+  padding:5px 8px;text-align:center;border-bottom:2px solid var(--border);
+}
+thead th.sep-left{border-left:1px solid var(--border)}
+tbody tr{border-bottom:1px solid var(--border-lite);transition:background .08s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#f8fafc}
+tbody tr.row-selected{background:#ede9fe!important}
+tbody td{padding:0;vertical-align:middle;height:38px}
+td.col-ck,th.col-ck-h{
+  width:40px;text-align:center;vertical-align:middle;
+  border-right:1px solid var(--border-lite);padding:0;
+}
+td.col-ck input[type=checkbox],th.col-ck-h input[type=checkbox]{
+  width:15px;height:15px;cursor:pointer;accent-color:var(--indigo);
+}
+
+/* ── Price table (in settings) ───────────────────────────── */
+.price-table{width:100%;border-collapse:collapse;font-size:13px}
+.price-table th{
+  background:#f8fafc;font-size:10.5px;font-weight:600;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.4px;padding:7px 8px;
+  text-align:left;border-bottom:1px solid var(--border);
+}
+.price-table td{padding:2px 4px;border-bottom:1px solid var(--border-lite);vertical-align:middle}
+.price-table tr:last-child td{border-bottom:none}
+.price-table td input{
+  border:1px solid transparent;border-radius:4px;padding:4px 6px;
+  font-family:var(--font);font-size:13px;width:100%;background:transparent;
+  outline:none;
+}
+.price-table td input:focus{border-color:var(--indigo);background:#fff;box-shadow:0 0 0 2px rgba(79,70,229,.1)}
+.price-table td.pt-del{width:30px;text-align:center}
+.pt-add-row{
+  margin-top:10px;
+  color:var(--indigo);font-size:13px;font-weight:500;background:none;border:none;
+  cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px;
+  padding:4px 0;
+}
+.pt-add-row:hover{text-decoration:underline}
+
+/* ── Vendor cards (settings) ─────────────────────────────── */
+.vendor-card{border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.vendor-card-head{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#e8eef6;cursor:pointer;user-select:none;}
+.vendor-card-head:hover{background:#dde5ef}
+.vendor-card-name{font-size:13px;font-weight:700;flex:1;color:var(--text)}
+.vendor-card-name-input,.item-card-name-input{background:none;border:none;border-bottom:1px dashed transparent;font-family:var(--font);font-size:13px;font-weight:700;color:var(--text);flex:1;padding:0;outline:none;cursor:text;min-width:0}
+.vendor-card-name-input:hover,.item-card-name-input:hover{border-bottom-color:var(--border)}
+.vendor-card-name-input:focus,.item-card-name-input:focus{border-bottom-color:var(--indigo)}
+.vendor-toggle{background:none;border:none;cursor:pointer;color:var(--text3);font-size:10px;padding:2px 4px;transition:transform .2s;line-height:1;}
+.vendor-card.open .vendor-toggle{transform:rotate(90deg)}
+.vendor-card-body{display:none;padding:10px 12px 12px;border-top:1px solid var(--border)}
+.vendor-card.open .vendor-card-body{display:block}
+.vendor-item-add{display:flex;gap:6px;margin-bottom:10px;}
+
+/* ── Item cards (settings 品項 tab) ──────────────────────── */
+.item-card{border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.item-card-head{
+  display:flex;align-items:center;gap:8px;padding:9px 12px;
+  background:#fafbfc;cursor:pointer;user-select:none;
+}
+.item-card-head:hover{background:var(--bg)}
+.item-card-name{font-size:13px;font-weight:600;flex:1;color:var(--text)}
+.item-card-name-input{font-weight:600!important}
+.spec-badge{
+  font-size:11px;color:var(--text3);padding:2px 7px;
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--r-full);
+}
+.item-toggle{
+  background:none;border:none;cursor:pointer;color:var(--text3);
+  font-size:10px;padding:2px 4px;transition:transform .2s;line-height:1;
+}
+.item-card.open .item-toggle{transform:rotate(90deg)}
+.item-card-body{display:none;padding:10px 12px;border-top:1px solid var(--border-lite)}
+.item-card.open .item-card-body{display:block}
+.spec-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:13px;margin-bottom:8px;min-width:0}
+.spec-table th{
+  background:#f8fafc;font-size:10px;font-weight:600;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.4px;padding:5px 6px;
+  text-align:left;border-bottom:1px solid var(--border);
+}
+.spec-table td{padding:2px 3px;border-bottom:1px solid var(--border-lite);vertical-align:middle}
+.spec-table tr:last-child td{border-bottom:none}
+.spec-table td input{
+  border:1px solid transparent;border-radius:4px;padding:4px 6px;
+  font-family:var(--font);font-size:13px;width:100%;min-width:0;background:transparent;outline:none;
+}
+.spec-table td input:focus{border-color:var(--indigo);background:#fff;box-shadow:0 0 0 2px rgba(79,70,229,.1)}
+.spec-table td.spec-del{width:28px;text-align:center}
+.add-spec-btn{
+  color:var(--indigo);font-size:12px;font-weight:500;background:none;border:none;
+  cursor:pointer;font-family:var(--font);padding:3px 0;
+  display:flex;align-items:center;gap:3px;
+}
+.add-spec-btn:hover{text-decoration:underline}
+
+td.col-calc{
+  text-align:right;padding-right:10px;font-weight:600;color:var(--indigo-d);
+  background:#fafbff;white-space:nowrap;border-left:1px solid var(--border-lite);
+}
+td.col-note{background:#fafafa}
+td.col-del{width:36px;text-align:center;border-left:1px solid var(--border-lite)}
+td input[type=text],td input[type=number],td input[type=date]{
+  border:none;outline:none;background:transparent;
+  font-family:var(--font);font-size:13px;width:100%;height:100%;
+  padding:8px;color:var(--text);
+}
+td input[type=number]{text-align:right}
+input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input.no-spin{-moz-appearance:textfield;appearance:textfield}
+input[data-cb=kg]{text-align:right}
+td input[data-cb], .bt td input[data-cb], input[data-cb]{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat:no-repeat !important;background-position:right 8px center !important;padding-right:24px !important;
+}
+td input:focus{background:#fffbeb;box-shadow:inset 0 0 0 1.5px var(--amber)}
+td input[type=date]{min-width:120px}
+.del-row{
+  background:none;border:none;color:var(--text3);cursor:pointer;
+  font-size:15px;width:26px;height:26px;display:flex;align-items:center;
+  justify-content:center;border-radius:5px;margin:auto;transition:all .1s;
+}
+.del-row:hover{color:var(--red);background:var(--red-lite)}
+tfoot tr td{
+  background:#f8fafc;border-top:2px solid var(--border);
+  padding:10px;font-weight:600;font-size:13px;color:var(--text2);
+}
+tfoot tr td.foot-label{text-align:right;padding-right:12px;letter-spacing:.3px}
+tfoot tr td.foot-value{text-align:right;padding-right:10px;color:var(--indigo);font-size:15px;font-weight:700}
+
+/* ── Combobox dropdown ───────────────────────────────────── */
+#cbDrop{
+  display:none;position:fixed;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--r);
+  box-shadow:var(--sh-lg);list-style:none;z-index:9000;
+  max-height:220px;overflow-y:auto;min-width:100px;
+}
+#cbDrop li{
+  padding:7px 12px;font-size:13px;color:var(--text);
+  cursor:pointer;white-space:nowrap;
+}
+#cbDrop li:hover,#cbDrop li.cb-active{background:var(--indigo-lite);color:var(--indigo)}
+#cbDrop li mark{background:#fef9c3;color:inherit;border-radius:2px;padding:0 1px}
+
+/* ── Summary cards ───────────────────────────────────────── */
+.summary-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:650px){.summary-row{grid-template-columns:1fr}}
+.sum-card{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--sh-sm);border:1px solid var(--border);overflow:hidden}
+.sum-head{
+  padding:13px 16px;border-bottom:1px solid var(--border);
+  font-size:13px;font-weight:600;color:var(--text);
+  display:flex;align-items:center;gap:7px;background:#fafbfc;
+}
+.sum-table{width:100%;border-collapse:collapse;font-size:13px}
+.sum-table th{
+  padding:7px 12px;text-align:left;font-size:10.5px;font-weight:600;
+  color:var(--text3);text-transform:uppercase;letter-spacing:.4px;
+  background:#fafbfc;border-bottom:1px solid var(--border);
+}
+.sum-table th:nth-child(2){text-align:right}
+.sum-table th:last-child{text-align:right}
+.sum-table td{padding:8px 12px;border-bottom:1px solid var(--border-lite);color:var(--text)}
+.sum-table tr:last-child td{border-bottom:none}
+.sum-table td:nth-child(2){text-align:right;color:var(--text2)}
+.sum-table td:last-child{text-align:right;font-weight:600;color:var(--indigo)}
+
+/* ── Batch drawer ────────────────────────────────────────── */
+.drawer-overlay{
+  display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);
+  z-index:500;backdrop-filter:blur(2px);
+}
+.drawer-overlay.open{display:block}
+.drawer{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;
+  box-shadow:var(--sh-xl);z-index:501;
+  display:flex;flex-direction:column;max-height:82vh;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);
+}
+.drawer-overlay.open .drawer{transform:translateY(0)}
+.drawer-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;flex-shrink:0}
+.drawer-head{
+  padding:14px 20px 12px;display:flex;align-items:flex-start;
+  justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.drawer-head h2{font-size:15px;font-weight:600}
+.drawer-head p{font-size:12px;color:var(--text3);margin-top:2px}
+.drawer-body{flex:1;overflow:auto}
+.drawer-foot{
+  padding:12px 20px;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;background:#fafbfc;
+}
+.add-row-btn{
+  color:var(--indigo);font-size:13px;font-weight:500;background:none;border:none;
+  cursor:pointer;display:flex;align-items:center;gap:4px;
+  padding:4px 0;font-family:var(--font);
+}
+.add-row-btn:hover{text-decoration:underline}
+.drawer-foot-actions{margin-left:auto;display:flex;gap:8px}
+
+/* Batch table */
+.btw{overflow-x:auto}
+.bt{border-collapse:collapse;width:100%;min-width:920px;font-size:13px}
+.bt thead th{
+  background:#f8fafc;font-size:10.5px;font-weight:600;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.4px;padding:9px 8px;
+  text-align:center;border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:1;
+}
+.bt tbody tr{border-bottom:1px solid var(--border-lite)}
+.bt tbody tr:hover{background:#fafafa}
+.bt tbody tr.bt-err{background:#fff5f5}
+.bt td{padding:0;height:40px;vertical-align:middle}
+.bt td input[type=text],.bt td input[type=number],.bt td input[type=date]{
+  border:none;outline:none;background:transparent;
+  font-family:var(--font);font-size:13px;width:100%;height:100%;
+  padding:8px;color:var(--text);
+}
+.bt td input[type=number]{text-align:right}
+.bt td input:focus{background:#fffbeb;box-shadow:inset 0 0 0 1.5px var(--amber)}
+.bt td.bt-calc{text-align:right;padding-right:10px;font-weight:600;color:var(--indigo-d);background:#fafbff;white-space:nowrap}
+.bt td.bt-del{width:36px;text-align:center;border-left:1px solid var(--border-lite)}
+.bt-num{text-align:center;color:var(--text3);font-size:11px;width:32px;border-right:1px solid var(--border-lite);padding:0 6px}
+.bt-saved-count{font-size:12px;color:var(--green);font-weight:500}
+
+/* ── Modal ───────────────────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);
+  z-index:600;backdrop-filter:blur(2px);
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--sh-xl);
+  width:100%;max-width:500px;margin:20px;overflow:hidden;
+  animation:mIn .2s ease-out;
+}
+@keyframes mIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-head{
+  padding:18px 20px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;
+}
+.modal-head h2{font-size:15px;font-weight:600}
+.modal-head p{font-size:12px;color:var(--text3);margin-top:2px}
+.modal-close{
+  background:none;border:none;cursor:pointer;color:var(--text3);
+  font-size:20px;line-height:1;padding:2px;border-radius:5px;
+  transition:color .1s;margin-left:12px;
+}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:18px 20px}
+.modal-foot{
+  padding:12px 20px;border-top:1px solid var(--border);
+  display:flex;justify-content:flex-end;gap:8px;background:#fafbfc;
+}
+
+/* Form fields */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg .full{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.4px}
+.field input{
+  border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;
+  font-family:var(--font);font-size:13px;color:var(--text);outline:none;
+  transition:border-color .15s,box-shadow .15s;background:var(--surface);
+}
+.field input:focus{border-color:var(--indigo);box-shadow:0 0 0 2px rgba(79,70,229,.15)}
+.field input[readonly]{background:var(--bg);color:var(--indigo);font-weight:600;cursor:default}
+
+/* ── Print-only elements (hidden on screen) ─────────────── */
+.print-header,.print-section-label{display:none}
+
+/* ── Print ───────────────────────────────────────────────── */
+@media print{
+  @page{size:A4 landscape;margin:13mm 14mm}
+
+  *,*::before,*::after{
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+
+  /* ─ hide all UI chrome + summary ─ */
+  .topbar,.table-toolbar,.drawer-overlay,.stg-overlay,#cbDrop,
+  .del-row,.col-ck input,.col-ck-h input,.btn,
+  .summary-row,.print-section-label{display:none!important}
+
+  body{background:#fff!important;font-size:11px;margin:0;padding:0}
+  .main{padding:0!important;margin:0!important}
+
+  /* ─ Print header ─ */
+  .print-header{
+    display:flex!important;justify-content:space-between;align-items:flex-end;
+    padding-bottom:10px;margin-bottom:14px;
+    border-bottom:2px solid #334155;
+  }
+  .ph-left{display:flex;align-items:center;gap:11px}
+  .ph-logo{
+    width:38px;height:38px;background:#334155;border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;font-size:12px;letter-spacing:.5px;flex-shrink:0;
+  }
+  .ph-company{font-size:20px;font-weight:800;color:#0f172a;letter-spacing:1.5px;line-height:1.1}
+  .ph-en{font-size:9px;color:#64748b;letter-spacing:1.5px;margin-top:2px;font-weight:500}
+  .ph-right{text-align:right}
+  .ph-title{font-size:16px;font-weight:800;color:#0f172a;letter-spacing:4px}
+  .ph-meta{font-size:10px;color:#64748b;margin-top:4px;line-height:1.6}
+
+  /* ─ Table card ─ */
+  .table-card{box-shadow:none!important;border:none!important;border-radius:0!important}
+  .table-wrap{max-height:none!important;overflow:visible!important}
+
+  /* ─ Table ─ */
+  table{
+    width:100%;border-collapse:collapse;font-size:10.5px;
+    page-break-inside:auto;border:1.5px solid #94a3b8;
+  }
+  thead{position:static!important}
+  thead tr.th-main th,thead tr.th-sub th{
+    background:#e2e8f0!important;color:#1e293b!important;
+    font-size:9.5px;font-weight:700;
+    padding:7px 7px;border:1px solid #94a3b8!important;
+    text-align:center;white-space:nowrap;
+  }
+  tbody tr{page-break-inside:avoid}
+  tbody tr:nth-child(even){background:#f8fafc!important}
+  tbody tr:nth-child(odd){background:#fff!important}
+
+  td{
+    border:.75px solid #cbd5e1!important;
+    padding:5px 7px!important;vertical-align:middle;
+  }
+  td.col-note{background:transparent!important}
+  td.col-calc{font-weight:600;text-align:right;color:#0f172a}
+
+  /* Collapse checkbox & delete columns (incl. unstyled last th/td) */
+  .col-ck-h,.col-ck{padding:0!important;width:1px!important;overflow:hidden!important;background:#e2e8f0!important}
+  td.col-del,thead th:last-child,tfoot td:last-child{padding:0!important;width:1px!important;overflow:hidden!important}
+
+  /* Inputs → plain text */
+  td input[type=text],td input[type=number],td input[type=date]{
+    border:none!important;box-shadow:none!important;background:transparent!important;
+    padding:0!important;font-size:10.5px!important;font-family:inherit!important;
+    color:#0f172a!important;width:100%!important;height:auto!important;
+  }
+  input[data-cb]{background-image:none!important;padding-right:0!important}
+  td input[type=date]::-webkit-calendar-picker-indicator{display:none!important}
+
+  /* Tfoot */
+  tfoot td{
+    border:1px solid #94a3b8!important;padding:7px 8px!important;
+    background:#e2e8f0!important;
+  }
+  .foot-label{
+    font-weight:700;text-align:right;font-size:10px;
+    color:#334155;letter-spacing:.5px;
+  }
+  .foot-value{
+    text-align:right;font-weight:700;font-size:13px;color:#0f172a;min-width:90px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-logo">嘉鹿</div>
+    <div>
+      <div class="brand-name">包裝日報</div>
+      <div class="brand-sub" id="headerDate"></div>
+    </div>
+  </div>
+  <div class="topbar-gap"></div>
+  <input type="month" class="month-picker" id="monthPicker" onchange="switchMonth(this.value)">
+  <div class="topbar-right">
+    <span class="rc-badge" id="rowCount"></span>
+    <span class="rc-badge rc-amt" id="tStat">—</span>
+    <button class="btn-icon" onclick="openSettings()" title="廠商／品項管理">⚙</button>
+    <button class="btn-icon" onclick="exportCSV()" title="匯出 CSV">↓</button>
+    <button class="btn-icon" onclick="printPage()" title="列印">⎙</button>
+  </div>
+</header>
+
+<!-- Print header (hidden on screen, shown via @media print) -->
+<div class="print-header" id="printHeader">
+  <div class="ph-left">
+    <div class="ph-logo">嘉鹿</div>
+    <div>
+      <div class="ph-company">嘉鹿包裝</div>
+      <div class="ph-en">CHIA-LU PACKAGING</div>
+    </div>
+  </div>
+  <div class="ph-right">
+    <div class="ph-title">包 裝 日 報</div>
+    <div class="ph-meta" id="printDateInfo"></div>
+  </div>
+</div>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- Table card -->
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div class="toolbar-actions">
+        <button class="btn btn-danger-ghost btn-sm" onclick="deleteSelected()">刪除選取</button>
+        <button class="btn btn-primary btn-sm" onclick="openDrawer()">＋ 新增</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr class="th-main">
+            <th rowspan="2" class="col-ck-h"><input type="checkbox" id="selAll" onchange="toggleAll(this)"></th>
+            <th rowspan="2" style="min-width:118px">日期</th>
+            <th rowspan="2" style="min-width:72px">廠商</th>
+            <th rowspan="2" style="min-width:90px">品項</th>
+            <th colspan="2" class="sep-left">包裝方式</th>
+            <th colspan="2" class="sep-left">包裝數量</th>
+            <th rowspan="2" style="min-width:78px">總重量(KG)</th>
+            <th rowspan="2" style="min-width:70px">價格/KG</th>
+            <th rowspan="2" style="min-width:86px">小計</th>
+            <th rowspan="2"></th>
+          </tr>
+          <tr class="th-sub">
+            <th class="sep-left">KG</th><th>註</th>
+            <th class="sep-left">箱</th><th>備註</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="10" class="foot-label">總計</td>
+            <td class="foot-value" id="grandTotal">$0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <span class="print-section-label">彙總報表</span>
+  <div class="summary-row">
+    <div class="sum-card" id="vendorSum"></div>
+    <div class="sum-card" id="itemSum"></div>
+  </div>
+
+</main>
+
+<!-- ── Settings Modal ────────────────────────────────────── -->
+<div class="stg-overlay" id="stgOverlay" onclick="if(event.target===this)closeSettings()">
+  <div class="stg-box">
+    <div class="stg-head">
+      <span class="stg-title">管理廠商與品項</span>
+      <button class="btn-icon" onclick="closeSettings()">×</button>
+    </div>
+    <div class="stg-import-bar">
+      <button class="btn btn-ghost btn-sm" onclick="exportMetaCsv()" title="匯出目前設定為 CSV">↓ 匯出 CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()" title="從 CSV 匯入廠商、品項、價格">↑ 匯入 CSV</button>
+      <input type="file" id="importFile" accept=".csv" style="display:none" onchange="importMeta(this)">
+      <span style="flex:1"></span>
+      <span style="font-size:11px;color:var(--text3)">格式：廠商, 品項, KG, 包裝方式, 備註, 價格/KG</span>
+    </div>
+    <div class="stg-body">
+      <div class="stg-section active" id="stgAll">
+        <div class="stg-add">
+          <input class="fi" id="stgVInput" placeholder="新廠商名稱…" onkeydown="if(event.key==='Enter')addVendor()">
+          <button class="btn btn-primary btn-sm" onclick="addVendor()">新增廠商</button>
+        </div>
+        <div id="stgVList"></div>
+      </div>
+    </div>
+    <div class="stg-foot">
+      <button class="btn btn-ghost btn-sm" onclick="closeSettings()">關閉</button>
+      <button class="btn btn-primary btn-sm" id="stgSaveBtn" onclick="saveSettings()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Batch Drawer ────────────────────────────────────────── -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="overlayClick(event,'drawerOverlay')">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-head">
+      <div style="flex:1">
+        <h2>批量新增紀錄</h2>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+          <span style="font-size:12px;color:var(--text2);font-weight:500">日期</span>
+          <input class="fi" type="date" id="batchDate" style="width:145px" onchange="applyBatchDate(this.value)">
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeDrawer()">×</button>
+    </div>
+    <div class="drawer-body">
+      <div class="btw">
+        <table class="bt">
+          <thead>
+            <tr>
+              <th style="width:32px">#</th>
+              <th style="min-width:72px">廠商</th>
+              <th style="min-width:90px">品項</th>
+              <th style="min-width:56px">KG</th>
+              <th style="min-width:90px">包裝方式 註</th>
+              <th style="min-width:62px">箱數</th>
+              <th style="min-width:80px">備註</th>
+              <th style="min-width:62px">價格/KG</th>
+              <th style="min-width:80px">小計</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody id="batchBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="drawer-foot">
+      <button class="add-row-btn" onclick="addBatchRow()">＋ 新增一列</button>
+      <span class="bt-saved-count" id="batchCount"></span>
+      <div class="drawer-foot-actions">
+        <button class="btn btn-ghost" onclick="closeDrawer()">取消</button>
+        <button class="btn btn-success" onclick="saveBatch()">儲存全部</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Single Add/Edit Modal ─────────────────────────────── -->
+<div class="modal-overlay" id="modalOverlay" onclick="overlayClick(event,'modalOverlay')">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="modalTitle">新增包裝紀錄</h2>
+        <p id="modalSub">填寫完成後點「儲存」</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <div class="field">
+          <label>日期 *</label>
+          <input type="date" id="mDate">
+        </div>
+        <div class="field">
+          <label>廠商 *</label>
+          <input type="text" id="mVendor" data-cb="vendor" autocomplete="off" placeholder="CT / 主婦 / B…">
+        </div>
+        <div class="field full">
+          <label>品項 *</label>
+          <input type="text" id="mItem" data-cb="item" autocomplete="off" placeholder="青花菜 / 玉米粒…">
+        </div>
+        <div class="field">
+          <label>包裝方式 KG</label>
+          <input type="text" inputmode="decimal" id="mKg" data-cb="kg" autocomplete="off" placeholder="10">
+        </div>
+        <div class="field">
+          <label>包裝方式 註</label>
+          <input type="text" id="mKgNote" data-cb="kgnote" autocomplete="off" placeholder="1*10 / 箱 / 選別">
+        </div>
+        <div class="field">
+          <label>包裝數量 箱</label>
+          <input type="number" id="mBox" placeholder="箱數" min="0">
+        </div>
+        <div class="field">
+          <label>箱 備註</label>
+          <input type="text" id="mBoxNote" placeholder="備註">
+        </div>
+        <div class="field">
+          <label>價格 / KG</label>
+          <input type="number" id="mPrice" placeholder="2.00" step="0.1" min="0">
+        </div>
+        <div class="field">
+          <label>預覽小計</label>
+          <input type="text" id="mPreview" readonly>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveRecord()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shared combobox dropdown -->
+<ul id="cbDrop"></ul>
+
+<script>
+// ─── Initial data ──────────────────────────────────────────────────────────────
+const INIT = [
+  {date:'2026/1/1',  vendor:'CT',   item:'芋頭丁',   kg:12, kgNote:'1*12',    box:10,   boxNote:'', price:2},
+  {date:'2026/1/1',  vendor:'CT',   item:'蔥',        kg:10, kgNote:'1*10',    box:50,   boxNote:'', price:2},
+  {date:'2026/1/2',  vendor:'CT',   item:'玉米粒',    kg:15, kgNote:'箱',      box:110,  boxNote:'', price:1.5},
+  {date:'2026/1/2',  vendor:'CT',   item:'青豆仁',    kg:15, kgNote:'選別',    box:20,   boxNote:'', price:1},
+  {date:'2026/1/2',  vendor:'CT',   item:'紅蘿蔔丁',  kg:15, kgNote:'選別',   box:166,  boxNote:'', price:1},
+  {date:'2026/1/2',  vendor:'CT',   item:'毛豆仁',    kg:15, kgNote:'選別',    box:24,   boxNote:'', price:1},
+  {date:'2026/1/2',  vendor:'CT',   item:'芋頭塊',    kg:15, kgNote:'加工',    box:155,  boxNote:'', price:2},
+  {date:'2026/1/3',  vendor:'CT',   item:'三色混蔬',  kg:15, kgNote:'1*15',   box:199,  boxNote:'', price:2},
+  {date:'2026/1/3',  vendor:'主婦', item:'三色混蔬',  kg:12, kgNote:'500g*24',box:150,  boxNote:'', price:3},
+  {date:'2026/1/3',  vendor:'CT',   item:'馬鈴薯塊',  kg:12, kgNote:'1*12',   box:300,  boxNote:'', price:2},
+  {date:'2026/1/3',  vendor:'主婦', item:'青花菜',    kg:6,  kgNote:'250g*24', box:38,   boxNote:'', price:3},
+  {date:'2026/1/5',  vendor:'主婦', item:'玉米粒',    kg:15, kgNote:'600g*25', box:240,  boxNote:'', price:3},
+  {date:'2026/1/5',  vendor:'主婦', item:'毛豆仁',    kg:12, kgNote:'300g*40', box:200,  boxNote:'', price:3},
+  {date:'2026/1/6',  vendor:'CT',   item:'青花菜',    kg:10, kgNote:'400g*25', box:23,   boxNote:'', price:3},
+  {date:'2026/1/6',  vendor:'CT',   item:'青花菜',    kg:10, kgNote:'1*10',    box:699,  boxNote:'', price:2},
+  {date:'2026/1/6',  vendor:'CT',   item:'青花菜',    kg:10, kgNote:'箱',      box:200,  boxNote:'', price:1.5},
+  {date:'2026/1/7',  vendor:'CT',   item:'玉米粒',    kg:12, kgNote:'400g*30', box:2,    boxNote:'', price:3},
+  {date:'2026/1/7',  vendor:'CT',   item:'毛豆仁',    kg:12, kgNote:'400g*30', box:4,    boxNote:'', price:3},
+  {date:'2026/1/7',  vendor:'CT',   item:'青花菜',    kg:10, kgNote:'1*10',    box:728,  boxNote:'', price:2},
+  {date:'2026/1/7',  vendor:'B',    item:'青花菜',    kg:10, kgNote:'箱',      box:100,  boxNote:'', price:1.5},
+  {date:'2026/1/8',  vendor:'CT',   item:'玉米粒',    kg:15, kgNote:'1*15',    box:360,  boxNote:'', price:2},
+  {date:'2026/1/9',  vendor:'CT',   item:'青花菜',    kg:10, kgNote:'1*10',    box:299,  boxNote:'', price:2},
+  {date:'2026/1/10', vendor:'CT',   item:'青花菜',    kg:10, kgNote:'1*10',    box:505,  boxNote:'', price:2},
+  {date:'2026/1/10', vendor:'CT',   item:'菠菜',      kg:10, kgNote:'加工',    box:405,  boxNote:'', price:2},
+  {date:'2026/1/14', vendor:'CT',   item:'青花菜',    kg:10, kgNote:'1*10',    box:16,   boxNote:'', price:2},
+  {date:'2026/1/14', vendor:'CT',   item:'青花菜',    kg:10, kgNote:'箱',      box:100,  boxNote:'', price:1.5},
+  {date:'2026/1/14', vendor:'唯賀', item:'青花菜',    kg:10, kgNote:'1*10',    box:261,  boxNote:'', price:2},
+  {date:'2026/1/17', vendor:'CT',   item:'青豆仁',    kg:15, kgNote:'1*15',    box:50,   boxNote:'', price:2},
+  {date:'2026/1/17', vendor:'CT',   item:'芋頭丁',    kg:12, kgNote:'1*12',    box:10,   boxNote:'', price:2},
+  {date:'2026/1/17', vendor:'CT',   item:'芋頭塊',    kg:12, kgNote:'1*12',    box:10,   boxNote:'', price:2},
+  {date:'2026/1/17', vendor:'CT',   item:'青花菜',    kg:10, kgNote:'1*10',    box:18,   boxNote:'', price:2},
+  {date:'2026/1/17', vendor:'CT',   item:'青花菜',    kg:10, kgNote:'箱',      box:200,  boxNote:'', price:1.5},
+  {date:'2026/1/17', vendor:'唯賀', item:'青花菜',    kg:10, kgNote:'1*10',    box:139,  boxNote:'', price:2},
+  {date:'2026/1/22', vendor:'CT',   item:'菠菜',      kg:10, kgNote:'加工',    box:1003, boxNote:'', price:2},
+  {date:'2026/1/23', vendor:'CT',   item:'毛豆莢',    kg:10, kgNote:'箱',      box:294,  boxNote:'', price:1.5},
+  {date:'2026/1/24', vendor:'CT',   item:'青花菜',    kg:10, kgNote:'1*10',    box:350,  boxNote:'', price:2},
+  {date:'2026/1/25', vendor:'CT',   item:'青花菜',    kg:10, kgNote:'1*10',    box:277,  boxNote:'', price:2},
+  {date:'2026/1/25', vendor:'CT',   item:'青花菜',    kg:10, kgNote:'箱',      box:60,   boxNote:'', price:1.5},
+  {date:'2026/1/26', vendor:'CT',   item:'白花菜',    kg:10, kgNote:'1*10',    box:260,  boxNote:'', price:2},
+  {date:'2026/1/26', vendor:'CT',   item:'白花菜',    kg:10, kgNote:'箱',      box:120,  boxNote:'', price:1.5},
+  {date:'2026/1/27', vendor:'A',    item:'菠菜',      kg:10, kgNote:'箱',      box:15,   boxNote:'', price:3},
+  {date:'2026/1/27', vendor:'CT',   item:'白花菜',    kg:10, kgNote:'1*10',    box:293,  boxNote:'', price:2},
+  {date:'2026/1/28', vendor:'CT',   item:'青花菜',    kg:10, kgNote:'1*10',    box:154,  boxNote:'', price:2},
+  {date:'2026/1/28', vendor:'唯賀', item:'青花菜',    kg:10, kgNote:'1*10',    box:200,  boxNote:'', price:2},
+  {date:'2026/1/29', vendor:'八方', item:'白花菜',    kg:10, kgNote:'1*10',    box:274,  boxNote:'', price:2},
+  {date:'2026/1/30', vendor:'八方', item:'白花菜',    kg:10, kgNote:'1*10',    box:206,  boxNote:'', price:2},
+  {date:'2026/1/31', vendor:'CT',   item:'蔥',        kg:10, kgNote:'1*10',    box:20,   boxNote:'', price:2},
+  {date:'2026/1/31', vendor:'CT',   item:'芋頭丁',    kg:12, kgNote:'箱',      box:25,   boxNote:'', price:1.5},
+  {date:'2026/1/31', vendor:'CT',   item:'芋頭丁',    kg:12, kgNote:'1*12',    box:10,   boxNote:'', price:2},
+  {date:'2026/1/31', vendor:'CT',   item:'芋頭塊',    kg:12, kgNote:'1*12',    box:10,   boxNote:'', price:2},
+  {date:'2026/1/31', vendor:'B',    item:'青花菜',    kg:10, kgNote:'箱',      box:120,  boxNote:'', price:1.5},
+  {date:'2026/1/31', vendor:'八方', item:'白花菜',    kg:10, kgNote:'1*10',    box:120,  boxNote:'', price:2},
+  {date:'2026/1/31', vendor:'CT',   item:'白花菜',    kg:10, kgNote:'1*10',    box:87,   boxNote:'', price:2},
+  {date:'2026/1/31', vendor:'CT',   item:'青花菜',    kg:1,  kgNote:'加工',    box:320874,boxNote:'',price:1},
+  {date:'2026/1/31', vendor:'CT',   item:'白花菜',    kg:1,  kgNote:'加工',    box:129586,boxNote:'',price:1},
+  {date:'2026/1/31', vendor:'主婦', item:'青花菜',    kg:1,  kgNote:'加工',    box:8273, boxNote:'', price:1},
+];
+
+// ─── State ─────────────────────────────────────────────────────────────────────
+let records   = [];
+let filtered  = [];
+let editIdx   = null;
+let selected  = new Set();
+let batchRows = [];
+let currentMonth = ''; // YYYY-MM
+
+// ─── Math (must be before init IIFE) ──────────────────────────────────────────
+const qty  = r => (parseFloat(r.kg)||0) * (parseFloat(r.box)||0);
+const sub  = r => qty(r) * (parseFloat(r.price)||0);
+const fNum = n => n.toLocaleString('zh-TW',{maximumFractionDigits:2});
+const fMon = n => '$' + n.toLocaleString('zh-TW',{minimumFractionDigits:0});
+
+// ─── Persist ───────────────────────────────────────────────────────────────────
+let customVendors = []; // [{name, items:[{name, specs:[{kg,kgNote,note,price}]}]}]
+
+function save(){ localStorage.setItem('pkgData_'+currentMonth, JSON.stringify(records)); }
+
+function switchMonth(ym){
+  if(ym === currentMonth) return;
+  save();
+  currentMonth = ym;
+  const saved = localStorage.getItem('pkgData_'+currentMonth);
+  records  = saved ? JSON.parse(saved) : [];
+  filtered = [...records];
+  selected.clear();
+  refreshCbOptions();
+  renderTable(); renderSummary();
+}
+function saveMeta(){
+  localStorage.setItem('pkgMeta', JSON.stringify({ vendors: customVendors }));
+}
+
+function lookupPrice(vendor, item, kg, kgNote){
+  vendor = (vendor||'').trim(); item = (item||'').trim();
+  kg = parseFloat(kg)||0; kgNote = (kgNote||'').trim();
+  const vendorObj = customVendors.find(v=>v.name===vendor);
+  if(!vendorObj) return null;
+  const itemObj = vendorObj.items.find(i=>i.name===item);
+  if(!itemObj) return null;
+  const match = itemObj.specs.find(s=>(parseFloat(s.kg)||0)===kg&&(s.kgNote||'').trim()===kgNote);
+  return match ? parseFloat(match.price)||0 : null;
+}
+
+function uniqueVals(key){
+  return [...new Set(records.map(r=>r[key]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-TW'));
+}
+
+// ─── Combobox ──────────────────────────────────────────────────────────────────
+const KGNOTE_STATIC = ['1*10','1*12','1*15','箱','選別','加工','400g*25','400g*30','500g*24','600g*25','250g*24','300g*40'];
+let cbOpts = { vendor:[], item:[], kgnote:[] };
+
+function refreshCbOptions(){
+  const vendorNames = customVendors.map(v=>v.name);
+  const itemNames   = [...new Set(customVendors.flatMap(v=>v.items.map(i=>i.name)))];
+  cbOpts.vendor = [...new Set([...vendorNames, ...uniqueVals('vendor')])].sort((a,b)=>a.localeCompare(b,'zh-TW'));
+  cbOpts.item   = [...new Set([...itemNames,   ...uniqueVals('item')])].sort((a,b)=>a.localeCompare(b,'zh-TW'));
+  cbOpts.kgnote = [...new Set([...KGNOTE_STATIC, ...uniqueVals('kgNote')])].sort((a,b)=>a.localeCompare(b,'zh-TW'));
+}
+
+const cbDrop = document.getElementById('cbDrop');
+let cbCurrent = null;
+let cbTyping = false;
+let cbSelecting = false;
+
+function cbAttach(el){
+  el.addEventListener('focus', ()=>{ cbCurrent=el; cbTyping=false; cbShow(); });
+  el.addEventListener('click', ()=>{ cbCurrent=el; cbTyping=false; cbShow(); });
+  el.addEventListener('input', ()=>{ if(cbSelecting) return; cbCurrent=el; cbTyping=true; cbShow(); });
+  el.addEventListener('keydown', cbKey);
+}
+
+function cbShow(){
+  if(!cbCurrent || cbSelecting) return;
+  const type  = cbCurrent.dataset.cb;
+  const query = cbTyping ? cbCurrent.value.toLowerCase().trim() : '';
+  let pool;
+  if(type==='kg'){
+    const ctx = cbGetContext(cbCurrent);
+    pool = cbKgPool(ctx.vendor, ctx.item);
+    if(!pool.length){ cbHide(); return; }
+  } else if(type==='kgnote'){
+    const ctx = cbGetContext(cbCurrent);
+    pool = cbKgNotePool(ctx.vendor, ctx.item, ctx.kg);
+  } else if(type==='item'){
+    const ctx = cbGetContext(cbCurrent);
+    if(ctx.vendor){
+      const vObj = customVendors.find(v=>v.name===ctx.vendor);
+      const vItems = vObj ? vObj.items.map(i=>i.name) : [];
+      const hist = [...new Set(records.filter(r=>r.vendor===ctx.vendor).map(r=>r.item).filter(Boolean))];
+      pool = [...new Set([...vItems, ...hist])].sort((a,b)=>a.localeCompare(b,'zh-TW'));
+    } else {
+      pool = cbOpts.item;
+    }
+  } else {
+    pool = cbOpts[type] || [];
+  }
+  const hits = pool.filter(o => !query || String(o).toLowerCase().includes(query));
+  if(!hits.length){ cbHide(); return; }
+
+  cbDrop.innerHTML = hits.map(o => {
+    if(!query) return `<li data-v="${esc(o)}">${esc(o)}</li>`;
+    const lo = o.toLowerCase(), idx = lo.indexOf(query);
+    if(idx < 0) return `<li data-v="${esc(o)}">${esc(o)}</li>`;
+    return `<li data-v="${esc(o)}">${esc(o.slice(0,idx))}<mark>${esc(o.slice(idx,idx+query.length))}</mark>${esc(o.slice(idx+query.length))}</li>`;
+  }).join('');
+
+  const rect = cbCurrent.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom - 4;
+  const spaceAbove = rect.top - 4;
+  const showAbove = spaceBelow < 150 && spaceAbove > spaceBelow;
+
+  Object.assign(cbDrop.style, {
+    display:'block', position:'fixed',
+    left: rect.left + 'px',
+    top: showAbove ? 'auto' : (rect.bottom+2)+'px',
+    bottom: showAbove ? (window.innerHeight - rect.top + 2)+'px' : 'auto',
+    minWidth: Math.max(rect.width, 120)+'px',
+    maxWidth: '260px',
+  });
+
+  cbDrop.querySelectorAll('li').forEach(li=>{
+    li.addEventListener('mousedown', e=>{ e.preventDefault(); cbSelect(li.dataset.v); });
+  });
+}
+
+function cbHide(){ cbDrop.style.display='none'; cbTyping=false; }
+
+function cbSelect(val){
+  if(!cbCurrent) return;
+  cbSelecting = true;
+  cbCurrent.value = val;
+  cbHide();
+  cbCurrent.dispatchEvent(new Event('change',{bubbles:true}));
+  cbCurrent.dispatchEvent(new Event('input',{bubbles:true}));
+  cbSelecting = false;
+}
+
+function cbKey(e){
+  const items = [...cbDrop.querySelectorAll('li')];
+  let ai = items.findIndex(l=>l.classList.contains('cb-active'));
+  if(e.key==='ArrowDown'){ e.preventDefault(); ai=Math.min(ai+1,items.length-1); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); ai=Math.max(ai-1,0); }
+  else if(e.key==='Enter' && ai>=0){ e.preventDefault(); cbSelect(items[ai].dataset.v); return; }
+  else if(e.key==='Escape'||e.key==='Tab'){ cbHide(); return; }
+  else return;
+  items.forEach((l,i)=>l.classList.toggle('cb-active',i===ai));
+  if(ai>=0) items[ai].scrollIntoView({block:'nearest'});
+}
+
+document.addEventListener('click', e=>{
+  if(!cbDrop.contains(e.target) && !e.target.closest('[data-cb]')) cbHide();
+});
+
+// Attach cb to all existing [data-cb] in modal
+document.querySelectorAll('[data-cb]').forEach(cbAttach);
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+
+function pDate(s){ if(!s) return new Date(0); return new Date(s.replace(/\//g,'-')); }
+
+// ─── Table render ──────────────────────────────────────────────────────────────
+function renderTable(){
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  filtered.forEach((r,i)=>{
+    const q = qty(r), s = sub(r);
+    const tr = document.createElement('tr');
+    if(selected.has(i)) tr.classList.add('row-selected');
+
+    tr.innerHTML = `
+      <td class="col-ck"><input type="checkbox" ${selected.has(i)?'checked':''} onchange="toggleSel(${i},this.checked)"></td>
+      <td><input type="date" value="${toD(r.date)}" onchange="upd(${i},'date',this.value)"></td>
+      <td><input type="text" value="${esc(r.vendor)}" data-cb="vendor" autocomplete="off"
+           oninput="upd(${i},'vendor',this.value)" onchange="upd(${i},'vendor',this.value)" onblur="checkRecordSpec(${i})"></td>
+      <td><input type="text" value="${esc(r.item)}" data-cb="item" autocomplete="off"
+           oninput="upd(${i},'item',this.value)" onchange="upd(${i},'item',this.value)" onblur="checkRecordSpec(${i})"></td>
+      <td><input type="text" inputmode="decimal" value="${r.kg}" data-cb="kg" autocomplete="off" oninput="upd(${i},'kg',this.value)" onchange="upd(${i},'kg',this.value)" onblur="checkRecordSpec(${i})"></td>
+      <td class="col-note"><input type="text" value="${esc(r.kgNote)}" data-cb="kgnote" autocomplete="off"
+           oninput="upd(${i},'kgNote',this.value)" onchange="upd(${i},'kgNote',this.value)" onblur="checkRecordSpec(${i})"></td>
+      <td><input type="number" class="no-spin" value="${r.box}" onchange="upd(${i},'box',this.value)"></td>
+      <td class="col-note"><input type="text" value="${esc(r.boxNote)}" onchange="upd(${i},'boxNote',this.value)"></td>
+      <td class="col-calc" id="qty_${i}">${fNum(q)}</td>
+      <td><input type="number" value="${r.price}" step="0.1" onchange="upd(${i},'price',this.value)" onblur="checkRecordSpec(${i})"></td>
+      <td class="col-calc" id="sub_${i}">${fNum(s)}</td>
+      <td class="col-del"><button class="del-row" onclick="delRow(${i})" title="刪除">×</button></td>`;
+
+    tbody.appendChild(tr);
+
+    // attach combobox to new row inputs
+    tr.querySelectorAll('[data-cb]').forEach(cbAttach);
+  });
+
+  updateFooter();
+}
+
+function toD(s){
+  if(!s) return '';
+  const p = s.split('/');
+  if(p.length!==3) return s;
+  return `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`;
+}
+function fromD(v){
+  if(!v) return '';
+  const [y,m,d] = v.split('-');
+  return `${y}/${parseInt(m)}/${parseInt(d)}`;
+}
+
+function updateFooter(){
+  const total = filtered.reduce((s,r)=>s+sub(r),0);
+  document.getElementById('grandTotal').textContent = fMon(total);
+  document.getElementById('rowCount').textContent = `共 ${filtered.length} 筆`;
+  updateStats(total);
+  syncSelAll();
+}
+
+// ─── Inline update ─────────────────────────────────────────────────────────────
+function upd(fi, field, val){
+  const r = filtered[fi];
+  if(field==='date') r.date = fromD(val);
+  else if(['kg','box','price'].includes(field)) r[field] = parseFloat(val)||0;
+  else r[field] = val;
+
+  const qi = document.getElementById('qty_'+fi);
+  const si = document.getElementById('sub_'+fi);
+  if(qi) qi.textContent = fNum(qty(r));
+  if(si) si.textContent = fNum(sub(r));
+  updateFooter();
+  renderSummary();
+  save();
+}
+
+const _checkTimers = {};
+function checkRecordSpec(fi){
+  clearTimeout(_checkTimers[fi]);
+  _checkTimers[fi] = setTimeout(()=>{
+    const r = filtered[fi];
+    if(!r || !r.vendor || !r.item) return;
+    const row = {vendor:r.vendor, item:r.item, kg:r.kg, kgNote:r.kgNote, price:r.price};
+
+    const newSpecs = findNewSpecs([row]);
+    if(newSpecs.length){
+      const s = newSpecs[0];
+      const parts = [`廠商: ${s.vendor}`, `品項: ${s.item}`];
+      if(s.kg) parts.push(`KG: ${s.kg}`);
+      if(s.kgNote) parts.push(`包裝方式: ${s.kgNote}`);
+      if(s.price) parts.push(`價格/KG: ${s.price}`);
+      if(confirm(`以下組合不在設定中，是否新增至廠商設定？\n\n• ${parts.join(' / ')}`)){
+        let vObj = customVendors.find(v=>v.name===s.vendor);
+        if(!vObj){ vObj={name:s.vendor,items:[]}; customVendors.push(vObj); }
+        let iObj = vObj.items.find(i=>i.name===s.item);
+        if(!iObj){ iObj={name:s.item,specs:[]}; vObj.items.push(iObj); }
+        iObj.specs.push({kg:s.kg, kgNote:s.kgNote, note:'', price:s.price||''});
+        saveMeta(); refreshCbOptions();
+      }
+      return;
+    }
+
+    const modSpecs = findModifiedSpecs([row]);
+    if(modSpecs.length){
+      const s = modSpecs[0];
+      const parts = [`廠商: ${s.vendor}`, `品項: ${s.item}`];
+      if(s.kg) parts.push(`KG: ${s.kg}`);
+      if(s.kgNote) parts.push(`包裝方式: ${s.kgNote}`);
+      parts.push(`價格/KG: ${s.storedPrice} → ${s.price}`);
+      if(confirm(`以下組合的價格與設定不符，是否更新廠商設定？\n\n• ${parts.join(' / ')}`)){
+        for(const m of modSpecs) m.spec.price = m.price;
+        saveMeta(); refreshCbOptions();
+      }
+    }
+  }, 300);
+}
+
+// ─── Row selection ─────────────────────────────────────────────────────────────
+function toggleSel(i, checked){
+  checked ? selected.add(i) : selected.delete(i);
+  const rows = document.querySelectorAll('#tbody tr');
+  if(rows[i]) rows[i].classList.toggle('row-selected', checked);
+  syncSelAll();
+}
+function toggleAll(el){
+  const rows = document.querySelectorAll('#tbody tr');
+  if(el.checked){
+    filtered.forEach((_,i)=>selected.add(i));
+  } else {
+    selected.clear();
+  }
+  rows.forEach((tr,i)=>{
+    tr.classList.toggle('row-selected', el.checked);
+    const cb = tr.querySelector('input[type=checkbox]');
+    if(cb) cb.checked = el.checked;
+  });
+}
+function syncSelAll(){
+  const el = document.getElementById('selAll');
+  if(!el) return;
+  if(selected.size===0){ el.checked=false; el.indeterminate=false; }
+  else if(selected.size===filtered.length){ el.checked=true; el.indeterminate=false; }
+  else { el.checked=false; el.indeterminate=true; }
+}
+
+// ─── Delete ────────────────────────────────────────────────────────────────────
+function delRow(fi){
+  const r = filtered[fi];
+  if(!confirm(`確定刪除？\n${r.date}  ${r.vendor}  ${r.item}`)) return;
+  records.splice(records.indexOf(r),1);
+  filtered.splice(fi,1);
+  selected.clear();
+  after();
+}
+
+function deleteSelected(){
+  if(!selected.size){ alert('請先勾選要刪除的列'); return; }
+  if(!confirm(`確定刪除選取的 ${selected.size} 筆？`)) return;
+  [...selected].sort((a,b)=>b-a).forEach(i=>{
+    const r = filtered[i];
+    records.splice(records.indexOf(r),1);
+    filtered.splice(i,1);
+  });
+  selected.clear();
+  after();
+}
+
+function after(){
+  save(); refreshCbOptions();
+  filtered = [...records];
+  renderTable(); renderSummary();
+}
+
+// ─── Stats ─────────────────────────────────────────────────────────────────────
+function updateStats(total){
+  document.getElementById('tStat').textContent = fMon(total);
+}
+
+// ─── Summary cards ─────────────────────────────────────────────────────────────
+function renderSummary(){
+  const total = filtered.reduce((s,r)=>s+sub(r),0);
+  updateStats(total);
+
+  // Vendor
+  const vm={};
+  filtered.forEach(r=>{ if(!vm[r.vendor]) vm[r.vendor]={qty:0,sub:0};
+    vm[r.vendor].qty+=qty(r); vm[r.vendor].sub+=sub(r); });
+  const vr = Object.entries(vm).sort((a,b)=>b[1].sub-a[1].sub);
+
+  document.getElementById('vendorSum').innerHTML=`
+    <div class="sum-head">📦 廠商彙總</div>
+    <table class="sum-table">
+      <tr><th>廠商</th><th>總重量 KG</th><th>金額</th></tr>
+      ${vr.map(([v,d])=>`<tr><td>${v}</td><td>${fNum(d.qty)}</td><td>${fMon(d.sub)}</td></tr>`).join('')}
+    </table>`;
+
+  // Item
+  const im={};
+  filtered.forEach(r=>{ if(!im[r.item]) im[r.item]={qty:0,sub:0};
+    im[r.item].qty+=qty(r); im[r.item].sub+=sub(r); });
+  const ir = Object.entries(im).sort((a,b)=>b[1].sub-a[1].sub);
+
+  document.getElementById('itemSum').innerHTML=`
+    <div class="sum-head">🥦 品項彙總</div>
+    <table class="sum-table">
+      <tr><th>品項</th><th>總重量 KG</th><th>金額</th></tr>
+      ${ir.map(([item,d])=>`<tr><td>${item}</td><td>${fNum(d.qty)}</td><td>${fMon(d.sub)}</td></tr>`).join('')}
+    </table>`;
+}
+
+// ─── Single add/edit modal ─────────────────────────────────────────────────────
+function openModal(ri=null){
+  editIdx = ri;
+  document.getElementById('modalTitle').textContent = ri===null ? '新增包裝紀錄' : '編輯紀錄';
+  document.getElementById('modalSub').textContent = ri===null ? '填寫完成後點「儲存」' : '修改後點「儲存」';
+
+  const r = ri!==null ? filtered[ri] : null;
+  document.getElementById('mDate').value    = r ? toD(r.date) : toD(`${new Date().getFullYear()}/${new Date().getMonth()+1}/${new Date().getDate()}`);
+  document.getElementById('mVendor').value  = r?.vendor  || '';
+  document.getElementById('mItem').value    = r?.item    || '';
+  document.getElementById('mKg').value      = r?.kg      || '';
+  document.getElementById('mKgNote').value  = r?.kgNote  || '';
+  document.getElementById('mBox').value     = r?.box     || '';
+  document.getElementById('mBoxNote').value = r?.boxNote || '';
+  document.getElementById('mPrice').value   = r?.price   || '';
+  updateModalPreview();
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('mVendor').focus();
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  cbHide(); editIdx=null;
+}
+
+function saveRecord(){
+  const date  = fromD(document.getElementById('mDate').value);
+  const vendor= document.getElementById('mVendor').value.trim();
+  const item  = document.getElementById('mItem').value.trim();
+  if(!date||!vendor||!item){ alert('請填寫日期、廠商和品項'); return; }
+
+  const rec = {
+    date, vendor, item,
+    kg:      parseFloat(document.getElementById('mKg').value)||0,
+    kgNote:  document.getElementById('mKgNote').value.trim(),
+    box:     parseFloat(document.getElementById('mBox').value)||0,
+    boxNote: document.getElementById('mBoxNote').value.trim(),
+    price:   parseFloat(document.getElementById('mPrice').value)||0,
+  };
+
+  if(editIdx===null){
+    records.push(rec); filtered.push(rec);
+  } else {
+    const ri = records.indexOf(filtered[editIdx]);
+    if(ri>=0) records[ri]=rec;
+    filtered[editIdx]=rec;
+  }
+  closeModal();
+  after();
+}
+
+function setupModalPreview(){
+  ['mKg','mBox','mPrice'].forEach(id=>
+    document.getElementById(id).addEventListener('input', updateModalPreview));
+  // Auto-fill price from price table
+  ['mVendor','mItem','mKg','mKgNote'].forEach(id=>
+    document.getElementById(id).addEventListener('change', autoFillModalPrice));
+}
+function autoFillModalPrice(){
+  const vendor = document.getElementById('mVendor').value;
+  const item   = document.getElementById('mItem').value;
+  const kg     = document.getElementById('mKg').value;
+  const kgNote = document.getElementById('mKgNote').value;
+  if(!vendor || !item) return;
+  const p = lookupPrice(vendor, item, kg, kgNote);
+  if(p !== null){
+    document.getElementById('mPrice').value = p;
+    updateModalPreview();
+  }
+}
+function updateModalPreview(){
+  const k=parseFloat(document.getElementById('mKg').value)||0;
+  const b=parseFloat(document.getElementById('mBox').value)||0;
+  const p=parseFloat(document.getElementById('mPrice').value)||0;
+  const s=k*b*p;
+  document.getElementById('mPreview').value = s ? fMon(s) : '';
+}
+
+// ─── Batch add drawer ──────────────────────────────────────────────────────────
+function openDrawer(){
+  batchRows = [];
+  const tbody = document.getElementById('batchBody');
+  tbody.innerHTML = '';
+  document.getElementById('batchCount').textContent = '';
+
+  // Set today as default shared date
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  document.getElementById('batchDate').value = today;
+
+  addBatchRow();
+  document.getElementById('drawerOverlay').classList.add('open');
+  // Focus first vendor input
+  const first = tbody.querySelector('input[data-f=vendor]');
+  if(first) first.focus();
+}
+
+function applyBatchDate(val){
+  // No per-row date inputs; shared date is read at save time
+}
+
+function closeDrawer(){
+  document.getElementById('drawerOverlay').classList.remove('open');
+  cbHide();
+}
+
+function addBatchRow(){
+  const i = batchRows.length;
+  batchRows.push({vendor:'',item:'',kg:'',kgNote:'',box:'',boxNote:'',price:''});
+
+  const tbody = document.getElementById('batchBody');
+  const tr = document.createElement('tr');
+  tr.dataset.bi = i;
+
+  tr.innerHTML = `
+    <td class="bt-num">${i+1}</td>
+    <td><input type="text" data-cb="vendor" data-bi="${i}" data-f="vendor" autocomplete="off" placeholder="廠商"></td>
+    <td><input type="text" data-cb="item"   data-bi="${i}" data-f="item"   autocomplete="off" placeholder="品項"></td>
+    <td><input type="text" inputmode="decimal" data-cb="kg" data-bi="${i}" data-f="kg" autocomplete="off" placeholder="KG"></td>
+    <td><input type="text" data-cb="kgnote" data-bi="${i}" data-f="kgNote" autocomplete="off" placeholder="1*10"></td>
+    <td><input type="number" class="no-spin" data-bi="${i}" data-f="box" placeholder="箱數" min="0"></td>
+    <td><input type="text" data-bi="${i}" data-f="boxNote" placeholder="備註"></td>
+    <td><input type="number" data-bi="${i}" data-f="price" placeholder="價格" step="0.1" min="0" oninput="updateBatchSub(${i})"></td>
+    <td class="bt-calc" id="bsub_${i}">—</td>
+    <td class="bt-del"><button class="del-row" onclick="delBatchRow(${i})" title="刪除">×</button></td>`;
+
+  tbody.appendChild(tr);
+
+  // Wire up events
+  tr.querySelectorAll('[data-cb]').forEach(cbAttach);
+  tr.querySelectorAll('[data-bi]').forEach(inp=>{
+    const f = inp.dataset.f;
+    const update = ()=>{
+      const bi = parseInt(inp.dataset.bi);
+      batchRows[bi][f] = inp.value;
+      updateBatchSub(bi);
+      if(['vendor','item','kg','kgNote'].includes(f)) tryAutoFillBatch(bi);
+    };
+    inp.addEventListener('input', update);
+    inp.addEventListener('change', update);
+  });
+
+  // Re-number all rows
+  renumberBatch();
+}
+
+function delBatchRow(i){
+  batchRows.splice(i,1);
+  const tbody = document.getElementById('batchBody');
+  // Remove the tr with data-bi=i
+  const tr = tbody.querySelector(`tr[data-bi="${i}"]`);
+  if(tr) tr.remove();
+  // Re-index remaining rows
+  reindexBatch();
+}
+
+function reindexBatch(){
+  const tbody = document.getElementById('batchBody');
+  const rows = [...tbody.querySelectorAll('tr')];
+  rows.forEach((tr,newIdx)=>{
+    tr.dataset.bi = newIdx;
+    const numCell = tr.querySelector('.bt-num');
+    if(numCell) numCell.textContent = newIdx+1;
+    tr.querySelectorAll('[data-bi]').forEach(inp=>{ inp.dataset.bi = newIdx; });
+    const subCell = tr.querySelector('[id^=bsub_]');
+    if(subCell) subCell.id = 'bsub_'+newIdx;
+    const delBtn = tr.querySelector('.del-row');
+    if(delBtn) delBtn.setAttribute('onclick',`delBatchRow(${newIdx})`);
+  });
+  batchRows = rows.map((tr,newIdx)=>{
+    const get = f => tr.querySelector(`[data-f="${f}"]`)?.value || '';
+    return {
+      vendor:get('vendor'), item:get('item'),
+      kg:get('kg'), kgNote:get('kgNote'), box:get('box'),
+      boxNote:get('boxNote'), price:get('price')
+    };
+  });
+}
+
+function renumberBatch(){
+  document.querySelectorAll('#batchBody tr').forEach((tr,i)=>{
+    const cell = tr.querySelector('.bt-num');
+    if(cell) cell.textContent = i+1;
+  });
+}
+
+function updateBatchSub(i){
+  const r = batchRows[i];
+  const k = parseFloat(r.kg)||0, b = parseFloat(r.box)||0, p = parseFloat(r.price)||0;
+  const s = k*b*p;
+  const cell = document.getElementById('bsub_'+i);
+  if(cell) cell.textContent = s ? fMon(s) : '—';
+}
+
+function findModifiedSpecs(validRows){
+  const seen = new Set();
+  const result = [];
+  for(const r of validRows){
+    if(!r.price) continue;
+    const key = `${r.vendor}||${r.item}||${r.kg}||${r.kgNote}`;
+    if(seen.has(key)) continue;
+    seen.add(key);
+    const vObj = customVendors.find(v=>v.name===r.vendor);
+    if(!vObj) continue;
+    const iObj = vObj.items.find(i=>i.name===r.item);
+    if(!iObj) continue;
+    const spec = iObj.specs.find(s=>(parseFloat(s.kg)||0)===r.kg && (s.kgNote||'').trim()===r.kgNote);
+    if(!spec) continue;
+    const stored = parseFloat(spec.price)||0;
+    if(stored !== r.price) result.push({...r, storedPrice:stored, spec});
+  }
+  return result;
+}
+
+function findNewSpecs(validRows){
+  const seen = new Set();
+  const result = [];
+  for(const r of validRows){
+    if(!r.kg && !r.kgNote) continue;
+    const key = `${r.vendor}||${r.item}||${r.kg}||${r.kgNote}`;
+    if(seen.has(key)) continue;
+    seen.add(key);
+    const vObj = customVendors.find(v=>v.name===r.vendor);
+    if(!vObj){ result.push(r); continue; }
+    const iObj = vObj.items.find(i=>i.name===r.item);
+    if(!iObj){ result.push(r); continue; }
+    const exists = iObj.specs.some(s=>(parseFloat(s.kg)||0)===r.kg && (s.kgNote||'').trim()===r.kgNote);
+    if(!exists) result.push(r);
+  }
+  return result;
+}
+
+function saveBatch(){
+  reindexBatch();
+  const sharedDate = fromD(document.getElementById('batchDate').value);
+  if(!sharedDate){ alert('請先設定日期'); return; }
+
+  const valid=[], invalid=[];
+  batchRows.forEach((r,i)=>{
+    if(!r.vendor.trim() || !r.item.trim()){
+      invalid.push(i+1);
+      const tr = document.querySelector(`#batchBody tr[data-bi="${i}"]`);
+      if(tr) tr.classList.add('bt-err');
+      return;
+    }
+    valid.push({
+      date: sharedDate, vendor:r.vendor.trim(), item:r.item.trim(),
+      kg:parseFloat(r.kg)||0, kgNote:r.kgNote.trim(),
+      box:parseFloat(r.box)||0, boxNote:r.boxNote.trim(),
+      price:parseFloat(r.price)||0,
+    });
+  });
+
+  if(invalid.length && valid.length===0){
+    alert(`第 ${invalid.join(', ')} 列缺少必填欄位（廠商、品項），請補齊後再儲存。`);
+    return;
+  }
+
+  const newSpecs = findNewSpecs(valid);
+  if(newSpecs.length){
+    const lines = newSpecs.map(s=>{
+      const parts = [`廠商: ${s.vendor}`, `品項: ${s.item}`];
+      if(s.kg) parts.push(`KG: ${s.kg}`);
+      if(s.kgNote) parts.push(`包裝方式: ${s.kgNote}`);
+      if(s.price) parts.push(`價格/KG: ${s.price}`);
+      return '• ' + parts.join(' / ');
+    }).join('\n');
+    if(confirm(`以下組合不在設定中，是否新增至廠商設定？\n\n${lines}`)){
+      for(const s of newSpecs){
+        let vObj = customVendors.find(v=>v.name===s.vendor);
+        if(!vObj){ vObj={name:s.vendor,items:[]}; customVendors.push(vObj); }
+        let iObj = vObj.items.find(i=>i.name===s.item);
+        if(!iObj){ iObj={name:s.item,specs:[]}; vObj.items.push(iObj); }
+        iObj.specs.push({kg:s.kg, kgNote:s.kgNote, note:'', price:s.price||''});
+      }
+      saveMeta(); refreshCbOptions();
+    }
+  }
+
+  const modSpecs = findModifiedSpecs(valid);
+  if(modSpecs.length){
+    const lines = modSpecs.map(s=>{
+      const parts = [`廠商: ${s.vendor}`, `品項: ${s.item}`];
+      if(s.kg) parts.push(`KG: ${s.kg}`);
+      if(s.kgNote) parts.push(`包裝方式: ${s.kgNote}`);
+      parts.push(`價格/KG: ${s.storedPrice} → ${s.price}`);
+      return '• ' + parts.join(' / ');
+    }).join('\n');
+    if(confirm(`以下組合的價格與設定不符，是否更新廠商設定？\n\n${lines}`)){
+      for(const s of modSpecs) s.spec.price = s.price;
+      saveMeta(); refreshCbOptions();
+    }
+  }
+
+  valid.forEach(rec=>{ records.push(rec); filtered.push(rec); });
+
+  const msg = invalid.length
+    ? `已儲存 ${valid.length} 筆，第 ${invalid.join(', ')} 列因缺少必填欄位而跳過。`
+    : `已儲存 ${valid.length} 筆紀錄。`;
+  document.getElementById('batchCount').textContent = msg;
+
+  if(invalid.length===0){
+    setTimeout(closeDrawer, 600);
+  }
+  after();
+}
+
+// ─── Utility ───────────────────────────────────────────────────────────────────
+function overlayClick(e, id){
+  if(e.target.id===id){
+    if(id==='drawerOverlay') return; // drawer 不允許點外部關閉
+    else closeModal();
+  }
+}
+
+// ─── Export CSV ────────────────────────────────────────────────────────────────
+function exportCSV(){
+  const h = ['日期','廠商','品項','包裝方式KG','包裝方式註','包裝數量箱','包裝數量備註','總重量(KG)','價格/KG','小計'];
+  const rows = filtered.map(r=>[r.date,r.vendor,r.item,r.kg,r.kgNote,r.box,r.boxNote,qty(r),r.price,sub(r)]);
+  const total = filtered.reduce((s,r)=>s+sub(r),0);
+  rows.push(['','','','','','','','','總計',total]);
+
+  const csv = [h,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = `嘉鹿包裝日報_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function printPage(){
+  const mp = document.getElementById('monthPicker').value; // "YYYY-MM"
+  const [y, m] = (mp || '').split('-');
+  const monthStr = y && m ? `${parseInt(y)} 年 ${parseInt(m)} 月` : '';
+  const now = new Date();
+  const todayStr = `${now.getFullYear()} 年 ${now.getMonth()+1} 月 ${now.getDate()} 日`;
+  const rowsStr = `共 ${filtered.length} 筆`;
+  document.getElementById('printDateInfo').innerHTML =
+    `報表月份：${monthStr}&emsp;列印日期：${todayStr}&emsp;${rowsStr}`;
+  window.print();
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeModal(); closeDrawer(); closeSettings(); } });
+
+// ─── Settings ──────────────────────────────────────────────────────────────────
+let _openCards = new Set(); // 'v:VendorName' or 'v:VendorName:i:ItemName'
+let _origMeta  = null;      // snapshot when settings opened
+
+function openSettings(){
+  _origMeta = JSON.stringify(customVendors);
+  renderVendorCards();
+  document.getElementById('stgOverlay').classList.add('open');
+}
+function saveSettings(){
+  saveMeta();
+  refreshCbOptions();
+  _origMeta = JSON.stringify(customVendors);
+  const btn = document.getElementById('stgSaveBtn');
+  btn.textContent = '已儲存 ✓';
+  setTimeout(()=>{ btn.textContent = '儲存'; }, 1500);
+}
+function closeSettings(){
+  const changed = JSON.stringify(customVendors) !== _origMeta;
+  if(changed){
+    const doSave = confirm('設定已修改，是否儲存變更？');
+    if(doSave){ saveMeta(); refreshCbOptions(); }
+    else { customVendors = JSON.parse(_origMeta); refreshCbOptions(); }
+  }
+  document.getElementById('stgOverlay').classList.remove('open');
+}
+
+function renderVendorCards(){
+  const list = document.getElementById('stgVList');
+  if(!customVendors.length){
+    list.innerHTML = '<span style="color:var(--text3);font-size:12px">尚無廠商，請在上方輸入新增</span>';
+    return;
+  }
+  list.innerHTML = customVendors.map((vendor,vi)=>`
+    <div class="vendor-card" id="vcard_${vi}">
+      <div class="vendor-card-head" onclick="toggleVendorCard(${vi})">
+        <button class="vendor-toggle">▶</button>
+        <input class="vendor-card-name-input" value="${esc(vendor.name)}" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" onchange="renameVendor(${vi},this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+        <span class="spec-badge">${vendor.items.length} 品項</span>
+        <button class="del-row" onclick="event.stopPropagation();removeVendor(${vi})" title="刪除廠商">×</button>
+      </div>
+      <div class="vendor-card-body">
+        <div class="vendor-item-add">
+          <input class="fi" id="stgIInput_${vi}" placeholder="新品項名稱…" style="flex:1"
+            onkeydown="if(event.key==='Enter')addItem(${vi})">
+          <button class="btn btn-primary btn-sm" onclick="addItem(${vi})">新增品項</button>
+        </div>
+        ${vendor.items.length ? vendor.items.map((item,ii)=>`
+          <div class="item-card" id="icard_${vi}_${ii}">
+            <div class="item-card-head" onclick="toggleItemCard(${vi},${ii})">
+              <button class="item-toggle">▶</button>
+              <input class="item-card-name-input" value="${esc(item.name)}" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" onchange="renameItem(${vi},${ii},this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+              <span class="spec-badge">${item.specs.length} 規格</span>
+              <button class="del-row" onclick="event.stopPropagation();removeItem(${vi},${ii})" title="刪除品項">×</button>
+            </div>
+            <div class="item-card-body">
+              ${item.specs.length ? `
+              <table class="spec-table">
+                <thead><tr>
+                  <th style="width:60px">KG</th>
+                  <th>包裝方式 (註)</th>
+                  <th style="width:80px">備註</th>
+                  <th style="width:72px">價格/KG</th>
+                  <th class="spec-del" style="width:28px"></th>
+                </tr></thead>
+                <tbody>
+                  ${item.specs.map((s,si)=>`
+                  <tr>
+                    <td><input type="number" value="${s.kg}" step="0.1" min="0" style="text-align:right" placeholder="KG" oninput="updSpec(${vi},${ii},${si},'kg',this.value)"></td>
+                    <td><input type="text" value="${esc(s.kgNote)}" placeholder="1*10 / 箱 / 選別" oninput="updSpec(${vi},${ii},${si},'kgNote',this.value)"></td>
+                    <td><input type="text" value="${esc(s.note||'')}" placeholder="備註" oninput="updSpec(${vi},${ii},${si},'note',this.value)"></td>
+                    <td><input type="number" value="${s.price}" step="0.01" min="0" style="text-align:right" placeholder="0.00" oninput="updSpec(${vi},${ii},${si},'price',this.value)"></td>
+                    <td class="spec-del"><button class="del-row" onclick="delSpec(${vi},${ii},${si})">×</button></td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>` : '<p style="color:var(--text3);font-size:12px;margin-bottom:8px">尚無規格，點下方新增</p>'}
+              <button class="add-spec-btn" onclick="addSpec(${vi},${ii})">＋ 新增規格</button>
+            </div>
+          </div>`).join('') : '<p style="color:var(--text3);font-size:12px">尚無品項</p>'}
+      </div>
+    </div>`).join('');
+  // Restore open states by name keys
+  _openCards.forEach(key=>{
+    if(key.includes(':i:')){
+      const [vPart, iName] = key.split(':i:');
+      const vi = customVendors.findIndex(v=>v.name===vPart.slice(2));
+      if(vi<0) return;
+      const ii = customVendors[vi].items.findIndex(i=>i.name===iName);
+      if(ii<0) return;
+      document.getElementById(`icard_${vi}_${ii}`)?.classList.add('open');
+    } else {
+      const vi = customVendors.findIndex(v=>v.name===key.slice(2));
+      if(vi>=0) document.getElementById(`vcard_${vi}`)?.classList.add('open');
+    }
+  });
+}
+
+function toggleVendorCard(vi){
+  const card = document.getElementById('vcard_'+vi);
+  if(!card) return;
+  card.classList.toggle('open');
+  const key = 'v:'+customVendors[vi].name;
+  if(card.classList.contains('open')) _openCards.add(key); else _openCards.delete(key);
+}
+function toggleItemCard(vi, ii){
+  const card = document.getElementById(`icard_${vi}_${ii}`);
+  if(!card) return;
+  card.classList.toggle('open');
+  const key = `v:${customVendors[vi].name}:i:${customVendors[vi].items[ii].name}`;
+  if(card.classList.contains('open')) _openCards.add(key); else _openCards.delete(key);
+}
+
+function renameVendor(vi, newName){
+  newName = newName.trim();
+  if(!newName || customVendors.find((v,i)=>i!==vi && v.name===newName)) return;
+  const oldName = customVendors[vi].name;
+  // Update _openCards name-based keys
+  const oldVKey = 'v:'+oldName;
+  if(_openCards.has(oldVKey)){ _openCards.delete(oldVKey); _openCards.add('v:'+newName); }
+  customVendors[vi].items.forEach(item=>{
+    const oldIKey = `v:${oldName}:i:${item.name}`;
+    if(_openCards.has(oldIKey)){ _openCards.delete(oldIKey); _openCards.add(`v:${newName}:i:${item.name}`); }
+  });
+  customVendors[vi].name = newName;
+  refreshCbOptions();
+}
+function renameItem(vi, ii, newName){
+  newName = newName.trim();
+  if(!newName) return;
+  const vName = customVendors[vi].name;
+  const oldName = customVendors[vi].items[ii].name;
+  const oldKey = `v:${vName}:i:${oldName}`;
+  if(_openCards.has(oldKey)){ _openCards.delete(oldKey); _openCards.add(`v:${vName}:i:${newName}`); }
+  customVendors[vi].items[ii].name = newName;
+  refreshCbOptions();
+}
+function addVendor(){
+  const inp = document.getElementById('stgVInput');
+  const val = inp.value.trim();
+  if(!val) return;
+  if(!customVendors.find(v=>v.name===val)) customVendors.push({name:val, items:[]});
+  inp.value='';
+  refreshCbOptions(); renderVendorCards();
+}
+function removeVendor(vi){
+  _openCards.delete('v:'+customVendors[vi].name);
+  customVendors.splice(vi,1);
+  refreshCbOptions(); renderVendorCards();
+}
+function addItem(vi){
+  const inp = document.getElementById('stgIInput_'+vi);
+  const val = inp.value.trim();
+  if(!val) return;
+  if(!customVendors[vi].items.find(i=>i.name===val)){
+    customVendors[vi].items.push({name:val, specs:[]});
+    _openCards.add('v:'+customVendors[vi].name);
+  }
+  inp.value='';
+  refreshCbOptions(); renderVendorCards();
+}
+function removeItem(vi, ii){
+  _openCards.delete(`v:${customVendors[vi].name}:i:${customVendors[vi].items[ii].name}`);
+  customVendors[vi].items.splice(ii,1);
+  refreshCbOptions(); renderVendorCards();
+}
+function addSpec(vi, ii){
+  if(!customVendors[vi]?.items[ii]) return;
+  customVendors[vi].items[ii].specs.push({kg:'', kgNote:'', note:'', price:''});
+  _openCards.add('v:'+customVendors[vi].name);
+  _openCards.add(`v:${customVendors[vi].name}:i:${customVendors[vi].items[ii].name}`);
+  renderVendorCards();
+}
+function updSpec(vi, ii, si, field, val){
+  if(customVendors[vi]?.items[ii]?.specs[si]) customVendors[vi].items[ii].specs[si][field] = val;
+  const badge = document.querySelector(`#icard_${vi}_${ii} .spec-badge`);
+  if(badge) badge.textContent = customVendors[vi].items[ii].specs.length + ' 規格';
+}
+function delSpec(vi, ii, si){
+  if(!customVendors[vi]?.items[ii]) return;
+  customVendors[vi].items[ii].specs.splice(si,1);
+  _openCards.add('v:'+customVendors[vi].name);
+  _openCards.add(`v:${customVendors[vi].name}:i:${customVendors[vi].items[ii].name}`);
+  renderVendorCards();
+}
+
+// ─── Context-aware combobox helpers ────────────────────────────────────────────
+function cbGetContext(el){
+  // Modal inputs have id starting with 'm'
+  if(el.id && el.id.startsWith('m')){
+    return {
+      vendor: document.getElementById('mVendor')?.value || '',
+      item:   document.getElementById('mItem')?.value   || '',
+      kg:     document.getElementById('mKg')?.value     || '',
+    };
+  }
+  // Batch rows have data-bi on the tr
+  const btr = el.closest('tr[data-bi]');
+  if(btr){
+    return {
+      vendor: btr.querySelector('[data-f=vendor]')?.value || '',
+      item:   btr.querySelector('[data-f=item]')?.value   || '',
+      kg:     btr.querySelector('[data-f=kg]')?.value     || '',
+    };
+  }
+  // Inline table rows
+  const itr = el.closest('#tbody tr');
+  if(itr){
+    return {
+      vendor: itr.querySelector('[data-cb=vendor]')?.value || '',
+      item:   itr.querySelector('[data-cb=item]')?.value   || '',
+      kg:     itr.querySelector('[data-cb=kg]')?.value     || '',
+    };
+  }
+  return {vendor:'', item:'', kg:''};
+}
+
+function cbKgPool(vendor, item){
+  vendor = (vendor||'').trim(); item = (item||'').trim();
+  if(!item) return [];
+  const vObj = customVendors.find(v=>v.name===vendor);
+  const itemObj = vObj?.items.find(i=>i.name===item);
+  if(!itemObj) return [];
+  const kgs = [...new Set(itemObj.specs.map(s=>String(s.kg)).filter(k=>k!==''&&k!==undefined))];
+  return kgs.sort((a,b)=>parseFloat(a)-parseFloat(b));
+}
+
+function cbKgNotePool(vendor, item, kg){
+  vendor = (vendor||'').trim(); item = (item||'').trim(); kg = (kg||'').trim();
+  const kgNum = parseFloat(kg)||0;
+  const vObj = customVendors.find(v=>v.name===vendor);
+  const itemObj = vObj?.items.find(i=>i.name===item);
+  const fromTable = itemObj
+    ? [...new Set(itemObj.specs
+        .filter(s=>!kg||(parseFloat(s.kg)||0)===kgNum)
+        .map(s=>(s.kgNote||'').trim()).filter(Boolean))]
+    : [];
+  if(fromTable.length) return fromTable;
+  return [...KGNOTE_STATIC].sort((a,b)=>a.localeCompare(b,'zh-TW'));
+}
+
+function tryAutoFillBatch(bi){
+  const r = batchRows[bi];
+  if(!r) return;
+  const p = lookupPrice(r.vendor, r.item, r.kg, r.kgNote);
+  if(p !== null){
+    r.price = p;
+    const tr = document.querySelector(`#batchBody tr[data-bi="${bi}"]`);
+    if(tr){
+      const priceInp = tr.querySelector('[data-f=price]');
+      if(priceInp) priceInp.value = p;
+    }
+    updateBatchSub(bi);
+  }
+}
+
+// ─── Import / Export CSV (meta) ────────────────────────────────────────────────
+function parseCsv(text){
+  if(text.charCodeAt(0)===0xFEFF) text=text.slice(1); // strip BOM
+  const rows=[]; let row=[], cur='', inQ=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQ){
+      if(c==='"'&&text[i+1]==='"'){ cur+='"'; i++; }
+      else if(c==='"'){ inQ=false; }
+      else cur+=c;
+    } else {
+      if(c==='"'){ inQ=true; }
+      else if(c===','){ row.push(cur); cur=''; }
+      else if(c==='\n'||c==='\r'){
+        if(c==='\r'&&text[i+1]==='\n') i++;
+        row.push(cur); cur='';
+        if(row.some(x=>x.trim())) rows.push(row);
+        row=[];
+      } else cur+=c;
+    }
+  }
+  if(row.length||cur){ row.push(cur); if(row.some(x=>x.trim())) rows.push(row); }
+  return rows;
+}
+
+function importMeta(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const rows = parseCsv(e.target.result);
+      if(rows.length < 2){ alert('CSV 格式錯誤：需要標題列和至少一筆資料'); input.value=''; return; }
+      const headers = rows[0].map(h=>h.trim());
+      const ci = (kw)=>headers.findIndex(h=>h.includes(kw));
+      const iV=ci('廠商'), iI=ci('品項'), iK=ci('KG'), iN=ci('包裝方式'), iB=ci('備註'), iP=ci('價格');
+      if(iV<0||iI<0){ alert('CSV 缺少「廠商」或「品項」欄位'); input.value=''; return; }
+
+      let added=0;
+      rows.slice(1).forEach(row=>{
+        const get=i=>i>=0?(row[i]||'').trim():'';
+        const vendor=get(iV), item=get(iI), kg=get(iK), kgNote=get(iN), note=get(iB), price=get(iP);
+        if(!vendor) return;
+        let vObj=customVendors.find(v=>v.name===vendor);
+        if(!vObj){ vObj={name:vendor,items:[]}; customVendors.push(vObj); }
+        if(!item) return;
+        let iObj=vObj.items.find(i=>i.name===item);
+        if(!iObj){ iObj={name:item,specs:[]}; vObj.items.push(iObj); }
+        if(kg||kgNote){
+          const dup=iObj.specs.find(s=>String(s.kg)===kg&&(s.kgNote||'')===kgNote);
+          if(dup){ dup.note=note; dup.price=price; } // update price if spec exists
+          else{ iObj.specs.push({kg,kgNote,note,price}); added++; }
+        }
+      });
+      saveMeta(); refreshCbOptions(); renderVendorCards();
+      alert(`匯入完成，新增 ${added} 筆規格`);
+    } catch(err){ alert('匯入失敗：'+err.message); }
+    input.value='';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function exportMetaCsv(){
+  const rows=[['廠商','品項','KG','包裝方式(註)','備註','價格/KG']];
+  customVendors.forEach(v=>{
+    if(!v.items.length){ rows.push([v.name,'','','','','']); return; }
+    v.items.forEach(item=>{
+      if(!item.specs.length){ rows.push([v.name,item.name,'','','','']); return; }
+      item.specs.forEach(s=>rows.push([v.name,item.name,s.kg,s.kgNote,s.note||'',s.price]));
+    });
+  });
+  if(rows.length===1){ alert('尚無廠商與品項資料可匯出'); return; }
+  const q=c=>`"${String(c===null||c===undefined?'':c).replace(/"/g,'""')}"`;
+  const csv=rows.map(r=>r.map(q).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='廠商品項設定.csv';
+  a.click();
+}
+
+// ─── Init (must be last — all let/const must be initialized before this runs) ──
+(function init(){
+  // Determine current month
+  const now0 = new Date();
+  currentMonth = `${now0.getFullYear()}-${String(now0.getMonth()+1).padStart(2,'0')}`;
+  document.getElementById('monthPicker').value = currentMonth;
+
+  // Migrate legacy pkgData (no month key) → pkgData_YYYY-MM
+  const legacy = localStorage.getItem('pkgData');
+  if(legacy && !localStorage.getItem('pkgData_'+currentMonth)){
+    localStorage.setItem('pkgData_'+currentMonth, legacy);
+    localStorage.removeItem('pkgData');
+  }
+
+  const saved = localStorage.getItem('pkgData_'+currentMonth);
+  records  = saved ? JSON.parse(saved) : [];
+  filtered = [...records];
+
+  const meta = localStorage.getItem('pkgMeta');
+  if(meta){
+    const m=JSON.parse(meta);
+    const rawVendors=m.vendors||[];
+    if(!rawVendors.length){
+      customVendors=[];
+    } else if(typeof rawVendors[0]==='string'){
+      // Old format: vendors=string[], items=[{name,specs}]
+      const rawItems=(m.items||[]).map(x=>typeof x==='string'?{name:x,specs:[]}:x);
+      customVendors=rawVendors.map(name=>({name, items:rawItems.map(item=>({name:item.name,specs:(item.specs||[]).map(s=>({...s}))})) }));
+    } else if(rawVendors[0]?.items!==undefined){
+      // New format: vendors=[{name,items}]
+      customVendors=rawVendors;
+    } else {
+      customVendors=rawVendors.map(v=>typeof v==='string'?{name:v,items:[]}:v);
+    }
+  }
+
+  const now = new Date();
+  document.getElementById('headerDate').textContent =
+    `更新 ${now.toLocaleDateString('zh-TW')} ${now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}`;
+  refreshCbOptions();
+  renderTable();
+  renderSummary();
+  setupModalPreview();
+})();
+</script>
+</body>
+</html>
