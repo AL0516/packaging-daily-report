@@ -647,8 +647,12 @@ tfoot tr td.foot-value{text-align:right;padding-right:10px;color:var(--indigo);f
 <div class="stg-overlay" id="stgOverlay" onclick="if(event.target===this)closeSettings()">
   <div class="stg-box">
     <div class="stg-head">
-      <span class="stg-title">管理廠商與品項</span>
+      <span class="stg-title">設定</span>
       <button class="btn-icon" onclick="closeSettings()">×</button>
+    </div>
+    <div class="stg-tabs">
+      <div class="stg-tab active" data-tab="All" onclick="switchStgTab('All')">廠商管理</div>
+      <div class="stg-tab" data-tab="Site" onclick="switchStgTab('Site')">網站設定</div>
     </div>
     <div class="stg-import-bar">
       <button class="btn btn-ghost btn-sm" onclick="exportMetaCsv()" title="匯出目前設定為 CSV">↓ 匯出 CSV</button>
@@ -668,6 +672,35 @@ tfoot tr td.foot-value{text-align:right;padding-right:10px;color:var(--indigo);f
           <button class="btn btn-primary btn-sm" onclick="addVendor()">新增廠商</button>
         </div>
         <div id="stgVList"></div>
+      </div>
+
+      <!-- 網站設定 tab -->
+      <div class="stg-section" id="stgSite">
+        <div style="display:flex;flex-direction:column;gap:16px;padding-top:4px">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">網站名稱</label>
+            <input class="fi" id="siteNameInput" placeholder="例：包裝日報" maxlength="20" style="width:100%" oninput="updateSitePreview()">
+            <div style="font-size:11px;color:var(--text3);margin-top:3px">顯示於左上角標題及瀏覽器分頁</div>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">品牌縮寫</label>
+            <input class="fi" id="siteLogoInput" placeholder="例：嘉鹿" maxlength="4" style="width:140px" oninput="updateSitePreview()">
+            <div style="font-size:11px;color:var(--text3);margin-top:3px">顯示於左上角藍色方塊（建議 2–4 字）</div>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">網頁 Icon（Emoji）</label>
+            <input class="fi" id="siteIconInput" placeholder="例：📦" maxlength="4" style="width:140px">
+            <div style="font-size:11px;color:var(--text3);margin-top:3px">設為瀏覽器分頁小圖示，留空不設定</div>
+          </div>
+          <!-- 預覽 -->
+          <div style="padding:12px;background:var(--bg);border-radius:var(--r);display:flex;align-items:center;gap:12px;margin-top:4px">
+            <div id="sitePreviewLogo" style="width:34px;height:34px;background:var(--indigo);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0;letter-spacing:.5px"></div>
+            <div>
+              <div id="sitePreviewName" style="font-size:15px;font-weight:600;color:var(--text)"></div>
+              <div style="font-size:11px;color:var(--text3)">預覽效果</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="stg-foot">
@@ -860,6 +893,7 @@ const fMon = n => '$' + n.toLocaleString('zh-TW',{minimumFractionDigits:0});
 
 // ─── Persist ───────────────────────────────────────────────────────────────────
 let customVendors = []; // [{name, items:[{name, specs:[{kg,kgNote,note,price}]}]}]
+let siteSettings  = {name:'包裝日報', logo:'嘉鹿', icon:''};
 
 function save(){ localStorage.setItem('pkgData_'+currentMonth, JSON.stringify(records)); }
 
@@ -875,7 +909,7 @@ function switchMonth(ym){
   renderTable(); renderSummary();
 }
 function saveMeta(){
-  localStorage.setItem('pkgMeta', JSON.stringify({ vendors: customVendors }));
+  localStorage.setItem('pkgMeta', JSON.stringify({ vendors: customVendors, site: siteSettings }));
 }
 
 function lookupPrice(vendor, item, kg, kgNote){
@@ -1561,10 +1595,23 @@ let _origMeta  = null;      // snapshot when settings opened
 
 function openSettings(){
   _origMeta = JSON.stringify(customVendors);
+  // Populate site settings inputs
+  document.getElementById('siteNameInput').value = siteSettings.name||'';
+  document.getElementById('siteLogoInput').value = siteSettings.logo||'';
+  document.getElementById('siteIconInput').value = siteSettings.icon||'';
+  updateSitePreview();
+  // Reset to vendors tab
+  switchStgTab('All');
   renderVendorCards();
   document.getElementById('stgOverlay').classList.add('open');
 }
 function saveSettings(){
+  // Read site settings
+  const name = (document.getElementById('siteNameInput')?.value||'').trim();
+  const logo = (document.getElementById('siteLogoInput')?.value||'').trim();
+  const icon = (document.getElementById('siteIconInput')?.value||'').trim();
+  siteSettings = {name:name||'包裝日報', logo:logo||'嘉鹿', icon};
+  applySiteSettings();
   saveMeta();
   refreshCbOptions();
   _origMeta = JSON.stringify(customVendors);
@@ -1582,6 +1629,49 @@ function closeSettings(){
   const s = document.getElementById('stgSearch');
   if(s) s.value = '';
   document.getElementById('stgOverlay').classList.remove('open');
+}
+
+function switchStgTab(tab){
+  document.querySelectorAll('.stg-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.stg-section').forEach(s=>s.classList.toggle('active',s.id==='stg'+tab));
+  document.querySelector('.stg-import-bar').style.display = tab==='All' ? '' : 'none';
+}
+
+function applySiteSettings(){
+  const {name, logo, icon} = siteSettings;
+  document.title = `【${logo||'嘉鹿'}】${name||'包裝日報'}`;
+  const bLogo = document.querySelector('.brand-logo');
+  if(bLogo) bLogo.textContent = logo||'嘉鹿';
+  const bName = document.querySelector('.brand-name');
+  if(bName) bName.textContent = name||'包裝日報';
+  const phLogo = document.querySelector('.ph-logo');
+  if(phLogo) phLogo.textContent = logo||'嘉鹿';
+  const phComp = document.querySelector('.ph-company');
+  if(phComp) phComp.textContent = logo||'嘉鹿';
+  if(icon) setFavicon(icon);
+}
+
+function setFavicon(emoji){
+  const canvas = document.createElement('canvas');
+  canvas.width = 64; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,64,64);
+  ctx.font = '52px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(emoji, 32, 36);
+  let link = document.querySelector("link[rel='icon']");
+  if(!link){ link=document.createElement('link'); link.rel='icon'; link.type='image/png'; document.head.appendChild(link); }
+  link.href = canvas.toDataURL();
+}
+
+function updateSitePreview(){
+  const logo = document.getElementById('siteLogoInput')?.value||'嘉鹿';
+  const name = document.getElementById('siteNameInput')?.value||'包裝日報';
+  const el = document.getElementById('sitePreviewLogo');
+  const en = document.getElementById('sitePreviewName');
+  if(el) el.textContent = logo;
+  if(en) en.textContent = name;
 }
 
 function filterVendorCards(q){
@@ -1981,6 +2071,7 @@ function exportMetaCsv(){
   const meta = localStorage.getItem('pkgMeta');
   if(meta){
     const m=JSON.parse(meta);
+    if(m.site) siteSettings = {...siteSettings, ...m.site};
     const rawVendors=m.vendors||[];
     if(!rawVendors.length){
       customVendors=[];
@@ -1999,6 +2090,7 @@ function exportMetaCsv(){
   const now = new Date();
   document.getElementById('headerDate').textContent =
     `更新 ${now.toLocaleDateString('zh-TW')} ${now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}`;
+  applySiteSettings();
   refreshCbOptions();
   renderTable();
   renderSummary();
