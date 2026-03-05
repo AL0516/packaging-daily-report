@@ -230,6 +230,9 @@ td.col-ck input[type=checkbox],th.col-ck-h input[type=checkbox]{
 .pt-add-row:hover{text-decoration:underline}
 
 /* ── Vendor cards (settings) ─────────────────────────────── */
+.stg-search{position:relative;margin-bottom:12px}
+.stg-search input{width:100%;padding-left:30px}
+.stg-search::before{content:'🔍';position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
 .vendor-card{border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
 .vendor-card-head{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#e8eef6;cursor:pointer;user-select:none;}
 .vendor-card-head:hover{background:#dde5ef}
@@ -651,11 +654,15 @@ tfoot tr td.foot-value{text-align:right;padding-right:10px;color:var(--indigo);f
       <button class="btn btn-ghost btn-sm" onclick="exportMetaCsv()" title="匯出目前設定為 CSV">↓ 匯出 CSV</button>
       <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()" title="從 CSV 匯入廠商、品項、價格">↑ 匯入 CSV</button>
       <input type="file" id="importFile" accept=".csv" style="display:none" onchange="importMeta(this)">
+      <button class="btn btn-ghost btn-sm" onclick="downloadMetaTemplate()" title="下載空白範本 CSV">↓ 範本</button>
       <span style="flex:1"></span>
       <span style="font-size:11px;color:var(--text3)">格式：廠商, 品項, KG, 包裝方式, 備註, 價格/KG</span>
     </div>
     <div class="stg-body">
       <div class="stg-section active" id="stgAll">
+        <div class="stg-search">
+          <input class="fi" id="stgSearch" type="text" placeholder="搜尋廠商或品項…" oninput="filterVendorCards(this.value)">
+        </div>
         <div class="stg-add">
           <input class="fi" id="stgVInput" placeholder="新廠商名稱…" onkeydown="if(event.key==='Enter')addVendor()">
           <button class="btn btn-primary btn-sm" onclick="addVendor()">新增廠商</button>
@@ -1572,7 +1579,29 @@ function closeSettings(){
     if(doSave){ saveMeta(); refreshCbOptions(); }
     else { customVendors = JSON.parse(_origMeta); refreshCbOptions(); }
   }
+  const s = document.getElementById('stgSearch');
+  if(s) s.value = '';
   document.getElementById('stgOverlay').classList.remove('open');
+}
+
+function filterVendorCards(q){
+  q = q.trim().toLowerCase();
+  document.querySelectorAll('#stgVList .vendor-card').forEach(vc=>{
+    const vname = (vc.querySelector('.vendor-card-name-input')?.value||'').toLowerCase();
+    const vendorMatch = !q || vname.includes(q);
+    let anyItemMatch = false;
+    vc.querySelectorAll('.item-card').forEach(ic=>{
+      const iname = (ic.querySelector('.item-card-name-input')?.value||'').toLowerCase();
+      const show = !q || vendorMatch || iname.includes(q);
+      ic.style.display = show ? '' : 'none';
+      if(iname.includes(q)) anyItemMatch = true;
+    });
+    const showVendor = !q || vendorMatch || anyItemMatch;
+    vc.style.display = showVendor ? '' : 'none';
+    if(q && showVendor) vc.classList.add('open'); // 搜尋時自動展開
+  });
+  // 清空搜尋時完整還原
+  if(!q) renderVendorCards();
 }
 
 function renderVendorCards(){
@@ -1831,10 +1860,32 @@ function parseCsv(text){
 function importMeta(input){
   const file = input.files[0];
   if(!file) return;
+  // 讀取原始 bytes，自動嘗試 UTF-8 → Big5 編碼
   const reader = new FileReader();
   reader.onload = e=>{
     try{
-      const rows = parseCsv(e.target.result);
+      const buf = e.target.result;
+      let text = '';
+      const encodings = ['UTF-8','Big5','GB2312','GBK'];
+      for(const enc of encodings){
+        try{
+          const t = new TextDecoder(enc,{fatal:true}).decode(buf);
+          text = t; break;
+        } catch(_){ /* 嘗試下一種 */ }
+      }
+      if(!text){ alert('無法識別檔案編碼，請另存為 UTF-8 CSV 後再匯入'); input.value=''; return; }
+
+      // 移除 BOM
+      if(text.charCodeAt(0)===0xFEFF) text=text.slice(1);
+
+      // 自動偵測分隔符（逗號 or Tab）
+      const firstLine = text.split(/\r?\n/)[0]||'';
+      const delim = (firstLine.split('\t').length > firstLine.split(',').length) ? '\t' : ',';
+
+      // 解析
+      let rows = delim==='\t' ? parseTsv(text) : parseCsv(text);
+      // 跳過 Excel sep= 指令行
+      if(rows.length && rows[0].length===1 && rows[0][0].trim().startsWith('sep=')) rows=rows.slice(1);
       if(rows.length < 2){ alert('CSV 格式錯誤：需要標題列和至少一筆資料'); input.value=''; return; }
       const headers = rows[0].map(h=>h.trim());
       const ci = (kw)=>headers.findIndex(h=>h.includes(kw));
@@ -1853,7 +1904,7 @@ function importMeta(input){
         if(!iObj){ iObj={name:item,specs:[]}; vObj.items.push(iObj); }
         if(kg||kgNote){
           const dup=iObj.specs.find(s=>String(s.kg)===kg&&(s.kgNote||'')===kgNote);
-          if(dup){ dup.note=note; dup.price=price; } // update price if spec exists
+          if(dup){ dup.note=note; dup.price=price; }
           else{ iObj.specs.push({kg,kgNote,note,price}); added++; }
         }
       });
@@ -1862,7 +1913,33 @@ function importMeta(input){
     } catch(err){ alert('匯入失敗：'+err.message); }
     input.value='';
   };
-  reader.readAsText(file, 'UTF-8');
+  reader.readAsArrayBuffer(file);
+}
+
+// Tab 分隔解析（簡易版，不支援引號內的 Tab）
+function parseTsv(text){
+  const rows=[];
+  for(const line of text.split(/\r?\n/)){
+    if(line.trim()) rows.push(line.split('\t').map(c=>c.replace(/^"|"$/g,'').replace(/""/g,'"')));
+  }
+  return rows;
+}
+
+function downloadMetaTemplate(){
+  const rows=[
+    ['廠商','品項','KG','包裝方式(註)','備註','價格/KG'],
+    ['廠商A','品項甲','10','1*10','','2'],
+    ['廠商A','品項甲','10','箱','','1.6'],
+    ['廠商A','品項乙','15','1*15','','1.8'],
+    ['廠商B','品項甲','10','1*10','','2'],
+    ['廠商B','品項丙','20','箱','','0.9'],
+  ];
+  const q=c=>`"${String(c===null||c===undefined?'':c).replace(/"/g,'""')}"`;
+  const csv=rows.map(r=>r.map(q).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='廠商品項範本.csv';
+  a.click();
 }
 
 function exportMetaCsv(){
