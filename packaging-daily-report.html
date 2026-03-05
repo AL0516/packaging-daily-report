@@ -701,9 +701,9 @@ tfoot tr td.foot-value{text-align:right;padding-right:10px;color:var(--indigo);f
       <div class="stg-section" id="stgSite">
         <div style="display:flex;flex-direction:column;gap:16px;padding-top:4px">
           <div>
-            <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">網站名稱</label>
-            <input class="fi" id="siteNameInput" placeholder="例：包裝日報" maxlength="20" style="width:100%" oninput="updateSitePreview()">
-            <div style="font-size:11px;color:var(--text3);margin-top:3px">顯示於左上角標題及瀏覽器分頁</div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">標題名稱</label>
+            <input class="fi" id="siteNameInput" placeholder="例：【嘉鹿】包裝日報" maxlength="40" style="width:100%" oninput="updateSitePreview()">
+            <div style="font-size:11px;color:var(--text3);margin-top:3px">同時顯示於左上角及瀏覽器分頁，可直接輸入括號</div>
           </div>
           <div>
             <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">品牌縮寫</label>
@@ -730,11 +730,6 @@ tfoot tr td.foot-value{text-align:right;padding-right:10px;color:var(--indigo);f
             </div>
           </div>
           <div>
-            <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">標題格式</label>
-            <input class="fi" id="siteTitleFmtInput" placeholder="【{logo}】{name}" style="width:100%" oninput="updateSitePreview()">
-            <div style="font-size:11px;color:var(--text3);margin-top:3px"><code style="background:var(--bg);padding:1px 4px;border-radius:3px">{logo}</code> 代入品牌縮寫，<code style="background:var(--bg);padding:1px 4px;border-radius:3px">{name}</code> 代入網站名稱</div>
-          </div>
-          <div>
             <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">網頁 Icon（Emoji）</label>
             <input class="fi" id="siteIconInput" placeholder="例：📦" maxlength="4" style="width:140px">
             <div style="font-size:11px;color:var(--text3);margin-top:3px">設為瀏覽器分頁小圖示，留空不設定</div>
@@ -744,7 +739,7 @@ tfoot tr td.foot-value{text-align:right;padding-right:10px;color:var(--indigo);f
             <div id="sitePreviewLogo" style="width:34px;height:34px;background:var(--indigo);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0;letter-spacing:.5px;overflow:hidden"></div>
             <div style="flex:1;min-width:0">
               <div id="sitePreviewName" style="font-size:15px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
-              <div id="sitePreviewTitle" style="font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+              <div style="font-size:11px;color:var(--text3)">預覽效果</div>
             </div>
           </div>
         </div>
@@ -940,7 +935,7 @@ const fMon = n => '$' + n.toLocaleString('zh-TW',{minimumFractionDigits:0});
 
 // ─── Persist ───────────────────────────────────────────────────────────────────
 let customVendors = []; // [{name, items:[{name, specs:[{kg,kgNote,note,price}]}]}]
-let siteSettings  = {name:'包裝日報', logo:'嘉鹿', icon:'', logoImg:'', titleFmt:'【{logo}】{name}'};
+let siteSettings  = {name:'【嘉鹿】包裝日報', logo:'嘉鹿', icon:'', logoImg:''};
 let _stagedLogoImg = null; // null=未變更, ''=移除, 'data:...'=新圖
 
 function save(){ localStorage.setItem('pkgData_'+currentMonth, JSON.stringify(records)); }
@@ -1648,7 +1643,6 @@ function openSettings(){
   document.getElementById('siteNameInput').value = siteSettings.name||'';
   document.getElementById('siteLogoInput').value = siteSettings.logo||'';
   document.getElementById('siteIconInput').value = siteSettings.icon||'';
-  document.getElementById('siteTitleFmtInput').value = siteSettings.titleFmt||'【{logo}】{name}';
   // Logo 圖片 UI
   const hasImg = !!siteSettings.logoImg;
   document.getElementById('logoUploadArea').style.display = hasImg ? 'none' : '';
@@ -1665,10 +1659,9 @@ function saveSettings(){
   const name = (document.getElementById('siteNameInput')?.value||'').trim();
   const logo = (document.getElementById('siteLogoInput')?.value||'').trim();
   const icon = (document.getElementById('siteIconInput')?.value||'').trim();
-  const titleFmt = (document.getElementById('siteTitleFmtInput')?.value||'').trim();
   // logoImg: 用暫存值（null=未動 → 保留舊值；''=移除；data:...=新圖）
   const logoImg = _stagedLogoImg !== null ? _stagedLogoImg : (siteSettings.logoImg||'');
-  siteSettings = {name:name||'包裝日報', logo:logo||'嘉鹿', icon, logoImg, titleFmt:titleFmt||'【{logo}】{name}'};
+  siteSettings = {name:name||'包裝日報', logo:logo||'嘉鹿', icon, logoImg};
   applySiteSettings();
   saveMeta();
   refreshCbOptions();
@@ -1696,10 +1689,9 @@ function switchStgTab(tab){
 }
 
 function applySiteSettings(){
-  const {name, logo, icon, logoImg, titleFmt} = siteSettings;
-  // 標題格式
-  const fmt = (titleFmt||'【{logo}】{name}').replace('{logo}', logo||'嘉鹿').replace('{name}', name||'包裝日報');
-  document.title = fmt;
+  const {name, logo, icon, logoImg} = siteSettings;
+  // 瀏覽器分頁標題 = name（使用者直接輸入完整標題）
+  document.title = name||'包裝日報';
   // Topbar brand logo（文字或圖片）
   const bLogo = document.querySelector('.brand-logo');
   if(bLogo){
@@ -1709,6 +1701,7 @@ function applySiteSettings(){
       bLogo.textContent = logo||'嘉鹿';
     }
   }
+  // Topbar brand name = 完整標題
   const bName = document.querySelector('.brand-name');
   if(bName) bName.textContent = name||'包裝日報';
   // 列印 header
@@ -1742,10 +1735,8 @@ function setFavicon(emoji){
 function updateSitePreview(){
   const logo = document.getElementById('siteLogoInput')?.value||'嘉鹿';
   const name = document.getElementById('siteNameInput')?.value||'包裝日報';
-  const fmt  = document.getElementById('siteTitleFmtInput')?.value||'【{logo}】{name}';
   const el = document.getElementById('sitePreviewLogo');
   const en = document.getElementById('sitePreviewName');
-  const et = document.getElementById('sitePreviewTitle');
   // Logo 預覽：優先顯示暫存圖，其次已儲存圖，最後文字
   if(el){
     const img = _stagedLogoImg !== null ? _stagedLogoImg : (siteSettings.logoImg||'');
@@ -1756,7 +1747,6 @@ function updateSitePreview(){
     }
   }
   if(en) en.textContent = name;
-  if(et) et.textContent = fmt.replace('{logo}', logo).replace('{name}', name);
 }
 function handleLogoImgUpload(input){
   const file = input.files[0];
