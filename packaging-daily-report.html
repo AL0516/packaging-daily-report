@@ -50,7 +50,28 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
   width:34px;height:34px;background:var(--indigo);border-radius:var(--r);
   display:flex;align-items:center;justify-content:center;
   color:#fff;font-weight:700;font-size:12px;letter-spacing:.5px;flex-shrink:0;
+  overflow:hidden;
 }
+.brand-logo img{width:100%;height:100%;object-fit:cover;display:block}
+.logo-upload-area{
+  border:1.5px dashed var(--border);border-radius:var(--r);padding:14px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+  background:var(--bg);transition:border-color .15s;
+}
+.logo-upload-area:hover{border-color:var(--indigo)}
+.logo-upload-area span{font-size:12px;color:var(--text3)}
+.logo-img-wrap{
+  display:flex;align-items:center;gap:10px;
+}
+.logo-img-thumb{
+  width:48px;height:48px;border-radius:var(--r);object-fit:cover;
+  border:1px solid var(--border);flex-shrink:0;
+}
+.logo-img-clear{
+  font-size:11px;color:var(--danger,#ef4444);cursor:pointer;
+  border:none;background:none;padding:0;font-family:inherit;
+}
+.logo-img-clear:hover{text-decoration:underline}
 .brand-name{font-size:15px;font-weight:600;letter-spacing:.3px}
 .brand-sub{font-size:11px;color:var(--text3);margin-top:1px}
 .topbar-gap{flex:1}
@@ -491,7 +512,9 @@ tfoot tr td.foot-value{text-align:right;padding-right:10px;color:var(--indigo);f
     width:38px;height:38px;background:#334155;border-radius:6px;
     display:flex;align-items:center;justify-content:center;
     color:#fff;font-weight:800;font-size:12px;letter-spacing:.5px;flex-shrink:0;
+    overflow:hidden;
   }
+  .ph-logo img{width:100%;height:100%;object-fit:cover;display:block}
   .ph-company{font-size:20px;font-weight:800;color:#0f172a;letter-spacing:1.5px;line-height:1.1}
   .ph-en{font-size:9px;color:#64748b;letter-spacing:1.5px;margin-top:2px;font-weight:500}
   .ph-right{text-align:right}
@@ -687,6 +710,30 @@ tfoot tr td.foot-value{text-align:right;padding-right:10px;color:var(--indigo);f
             <input class="fi" id="siteLogoInput" placeholder="例：嘉鹿" maxlength="4" style="width:140px" oninput="updateSitePreview()">
             <div style="font-size:11px;color:var(--text3);margin-top:3px">顯示於左上角藍色方塊（建議 2–4 字）</div>
           </div>
+          <!-- 圖片 Logo -->
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">Logo 圖片（選填）</label>
+            <input type="file" id="siteLogoImgFile" accept="image/*" style="display:none" onchange="handleLogoImgUpload(this)">
+            <!-- 上傳區 -->
+            <div class="logo-upload-area" id="logoUploadArea" onclick="document.getElementById('siteLogoImgFile').click()">
+              <span style="font-size:20px">🖼️</span>
+              <span>點擊上傳圖片</span>
+              <span>取代文字方塊，建議正方形</span>
+            </div>
+            <!-- 預覽圖 -->
+            <div class="logo-img-wrap" id="logoImgPreviewWrap" style="display:none">
+              <img id="logoImgThumb" class="logo-img-thumb" src="" alt="logo">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <button class="logo-img-clear" onclick="clearLogoImg()">✕ 移除圖片</button>
+                <span style="font-size:11px;color:var(--text3)">點擊移除後恢復文字方塊</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">標題格式</label>
+            <input class="fi" id="siteTitleFmtInput" placeholder="【{logo}】{name}" style="width:100%" oninput="updateSitePreview()">
+            <div style="font-size:11px;color:var(--text3);margin-top:3px"><code style="background:var(--bg);padding:1px 4px;border-radius:3px">{logo}</code> 代入品牌縮寫，<code style="background:var(--bg);padding:1px 4px;border-radius:3px">{name}</code> 代入網站名稱</div>
+          </div>
           <div>
             <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">網頁 Icon（Emoji）</label>
             <input class="fi" id="siteIconInput" placeholder="例：📦" maxlength="4" style="width:140px">
@@ -694,10 +741,10 @@ tfoot tr td.foot-value{text-align:right;padding-right:10px;color:var(--indigo);f
           </div>
           <!-- 預覽 -->
           <div style="padding:12px;background:var(--bg);border-radius:var(--r);display:flex;align-items:center;gap:12px;margin-top:4px">
-            <div id="sitePreviewLogo" style="width:34px;height:34px;background:var(--indigo);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0;letter-spacing:.5px"></div>
-            <div>
-              <div id="sitePreviewName" style="font-size:15px;font-weight:600;color:var(--text)"></div>
-              <div style="font-size:11px;color:var(--text3)">預覽效果</div>
+            <div id="sitePreviewLogo" style="width:34px;height:34px;background:var(--indigo);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0;letter-spacing:.5px;overflow:hidden"></div>
+            <div style="flex:1;min-width:0">
+              <div id="sitePreviewName" style="font-size:15px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+              <div id="sitePreviewTitle" style="font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
             </div>
           </div>
         </div>
@@ -893,7 +940,8 @@ const fMon = n => '$' + n.toLocaleString('zh-TW',{minimumFractionDigits:0});
 
 // ─── Persist ───────────────────────────────────────────────────────────────────
 let customVendors = []; // [{name, items:[{name, specs:[{kg,kgNote,note,price}]}]}]
-let siteSettings  = {name:'包裝日報', logo:'嘉鹿', icon:''};
+let siteSettings  = {name:'包裝日報', logo:'嘉鹿', icon:'', logoImg:'', titleFmt:'【{logo}】{name}'};
+let _stagedLogoImg = null; // null=未變更, ''=移除, 'data:...'=新圖
 
 function save(){ localStorage.setItem('pkgData_'+currentMonth, JSON.stringify(records)); }
 
@@ -1595,10 +1643,17 @@ let _origMeta  = null;      // snapshot when settings opened
 
 function openSettings(){
   _origMeta = JSON.stringify(customVendors);
+  _stagedLogoImg = null; // 重置暫存
   // Populate site settings inputs
   document.getElementById('siteNameInput').value = siteSettings.name||'';
   document.getElementById('siteLogoInput').value = siteSettings.logo||'';
   document.getElementById('siteIconInput').value = siteSettings.icon||'';
+  document.getElementById('siteTitleFmtInput').value = siteSettings.titleFmt||'【{logo}】{name}';
+  // Logo 圖片 UI
+  const hasImg = !!siteSettings.logoImg;
+  document.getElementById('logoUploadArea').style.display = hasImg ? 'none' : '';
+  document.getElementById('logoImgPreviewWrap').style.display = hasImg ? '' : 'none';
+  if(hasImg){ const t = document.getElementById('logoImgThumb'); if(t) t.src = siteSettings.logoImg; }
   updateSitePreview();
   // Reset to vendors tab
   switchStgTab('All');
@@ -1610,7 +1665,10 @@ function saveSettings(){
   const name = (document.getElementById('siteNameInput')?.value||'').trim();
   const logo = (document.getElementById('siteLogoInput')?.value||'').trim();
   const icon = (document.getElementById('siteIconInput')?.value||'').trim();
-  siteSettings = {name:name||'包裝日報', logo:logo||'嘉鹿', icon};
+  const titleFmt = (document.getElementById('siteTitleFmtInput')?.value||'').trim();
+  // logoImg: 用暫存值（null=未動 → 保留舊值；''=移除；data:...=新圖）
+  const logoImg = _stagedLogoImg !== null ? _stagedLogoImg : (siteSettings.logoImg||'');
+  siteSettings = {name:name||'包裝日報', logo:logo||'嘉鹿', icon, logoImg, titleFmt:titleFmt||'【{logo}】{name}'};
   applySiteSettings();
   saveMeta();
   refreshCbOptions();
@@ -1638,14 +1696,30 @@ function switchStgTab(tab){
 }
 
 function applySiteSettings(){
-  const {name, logo, icon} = siteSettings;
-  document.title = `【${logo||'嘉鹿'}】${name||'包裝日報'}`;
+  const {name, logo, icon, logoImg, titleFmt} = siteSettings;
+  // 標題格式
+  const fmt = (titleFmt||'【{logo}】{name}').replace('{logo}', logo||'嘉鹿').replace('{name}', name||'包裝日報');
+  document.title = fmt;
+  // Topbar brand logo（文字或圖片）
   const bLogo = document.querySelector('.brand-logo');
-  if(bLogo) bLogo.textContent = logo||'嘉鹿';
+  if(bLogo){
+    if(logoImg){
+      bLogo.innerHTML = `<img src="${logoImg}" alt="logo" style="width:100%;height:100%;object-fit:cover;display:block">`;
+    } else {
+      bLogo.textContent = logo||'嘉鹿';
+    }
+  }
   const bName = document.querySelector('.brand-name');
   if(bName) bName.textContent = name||'包裝日報';
+  // 列印 header
   const phLogo = document.querySelector('.ph-logo');
-  if(phLogo) phLogo.textContent = logo||'嘉鹿';
+  if(phLogo){
+    if(logoImg){
+      phLogo.innerHTML = `<img src="${logoImg}" alt="logo" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:4px">`;
+    } else {
+      phLogo.textContent = logo||'嘉鹿';
+    }
+  }
   const phComp = document.querySelector('.ph-company');
   if(phComp) phComp.textContent = logo||'嘉鹿';
   if(icon) setFavicon(icon);
@@ -1668,10 +1742,46 @@ function setFavicon(emoji){
 function updateSitePreview(){
   const logo = document.getElementById('siteLogoInput')?.value||'嘉鹿';
   const name = document.getElementById('siteNameInput')?.value||'包裝日報';
+  const fmt  = document.getElementById('siteTitleFmtInput')?.value||'【{logo}】{name}';
   const el = document.getElementById('sitePreviewLogo');
   const en = document.getElementById('sitePreviewName');
-  if(el) el.textContent = logo;
+  const et = document.getElementById('sitePreviewTitle');
+  // Logo 預覽：優先顯示暫存圖，其次已儲存圖，最後文字
+  if(el){
+    const img = _stagedLogoImg !== null ? _stagedLogoImg : (siteSettings.logoImg||'');
+    if(img){
+      el.innerHTML = `<img src="${img}" alt="logo" style="width:100%;height:100%;object-fit:cover;display:block">`;
+    } else {
+      el.textContent = logo;
+    }
+  }
   if(en) en.textContent = name;
+  if(et) et.textContent = fmt.replace('{logo}', logo).replace('{name}', name);
+}
+function handleLogoImgUpload(input){
+  const file = input.files[0];
+  if(!file){ return; }
+  if(file.size > 800*1024){ alert('圖片大小請勿超過 800 KB'); input.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    _stagedLogoImg = e.target.result;
+    // 顯示預覽縮圖
+    const thumb = document.getElementById('logoImgThumb');
+    if(thumb) thumb.src = _stagedLogoImg;
+    document.getElementById('logoUploadArea').style.display = 'none';
+    document.getElementById('logoImgPreviewWrap').style.display = '';
+    updateSitePreview();
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+function clearLogoImg(){
+  _stagedLogoImg = ''; // 空字串 = 要移除
+  const thumb = document.getElementById('logoImgThumb');
+  if(thumb) thumb.src = '';
+  document.getElementById('logoUploadArea').style.display = '';
+  document.getElementById('logoImgPreviewWrap').style.display = 'none';
+  updateSitePreview();
 }
 
 function filterVendorCards(q){
